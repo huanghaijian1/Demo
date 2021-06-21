@@ -1,0 +1,76 @@
+①.学籍管理 --- 多线程，io流
+ 1.多线程、io流、压缩包加解密、sftp服务器文件上传（多线程下）与下载、redis防止异步处理的重复提交、浮点数的运算
+ 2.防止内存溢出，减轻功能运行时所在的内存-分段处理数据
+ 3.poi:excel的导入导出，pdf的生成，及excel与pdf的互相转换 itext
+ 4.学生成绩单归档与培养方案归档（1、3点）
+
+②.教师工作量 --- sql编写能力、微服务
+ 1.教师工作量的初始化生成
+   工作量的计算规则多而复杂，特殊情况多，sql编写能力，代码复用性
+   难点：根据有限的条件查询排课信息（并准确查询和筛选有效数据很难把握，因为筛选有效数据时特殊情况多，表与表的关系比较微妙）
+   加以说明：初始化操作前要先选择按学年学期，课程，教学班分组生成工作量
+             -查询排课的相关信息，例如教学班人数（有分主班副班,班也可以分组，副班人数要计算到主班上），
+              课程学时，课程类型，课程属性等等，还有其他一些特殊情况
+             然后根据这些信息，计算教师工作量
+
+ 2.教师工作量的统计与分析
+   统计的数据和需要查询的基本信息刁钻，sql编写能力，代码复用性
+   加以说明：按开课单位、课程、校区、教师所在单位分别分组统计每个老师的每个工作量课程类型的工作量
+   用到的一些数据库里的函数有，decode(字段，(if)条件1，结果1，(else if)条件2，结果2，...,(else)不满足所有条件时的结果)
+   多行数据合并一行 listagg(字段名,',') within group (order by 字段名)，
+   多列数据拼接 concat('aa','bb')/concat(concat('aa','bb'),'cc')最多两个参数，'a'||'b':拼接 'ab'
+                substr(字段名,1,4) 从第一个字符开始截取四个
+                to_char(字段名）,case语句，replace(dmmc,'广东省'，'') dmmc里的广东省字样用''替换
+                a between b and c --> b<=a<c , length(ZYJSZWM)字段长度
+   计算类函数 round(X,y) 四舍五入保留y位小数,sum(X),min(),max(),avg(),to_number(X),count(1),
+               nvl(X,0) if X==NULL,'' nvl(X,0)=0 else nvl(X,0)=X,
+               格式：NULLIF (expr1, expr2) 含义：相等返回NULL，不等返回expr1
+   日期类函数 to_char(字段名，'yyyy-MM-dd'),yyyy-mm-dd为格式,还有yyyy-MM-dd hh:mi:ss、yyyy-MM-dd hh24:mi:ss等
+              to_date(字段名，'yyyy-MM-dd')
+              注意：在转化为DATE类型的时候一定要注意前后两个参数的格式，前后格式必须保持一致，否则会出错。
+   sql中临时表
+     with temp1 as (sql查询语句),temp2 as (sql查询语句) select * from temp1
+   关键字：distinct,union all 前后两条sql结果集全部合并/union 前后两条sql结果集合并,值一样的只显示一条
+   order by 字段名 desc/asc nulls last/first
+   sql语句执行效率问题：where 字句的顺序，in/exist的选择，涉及到数据量很多的表一般必须要建索引（where字句的列）
+   破坏索引的情况要注意，尽量避免用子查询
+   inner join/left join/right join/full join
+   表授权：grant  <权限>  on  表名[(列名)]  to  用户 With  grant  option
+           或 grant <权限> ON <数据对象> to <数据库用户>
+       //数据对象可以是表名或列名
+       //权限表示对表的操作，如select,update,insert,delete
+       注：授权命令是由数据库管理员使用的，若给用户分配权限时带With  grant  option子句，
+           则普通用户获权后,可把自己的权限授予其他用户
+   回收权限 revoke
+     REVOKE <权限> ON <数据对象>  FROM <数据库用户名>
+
+   创建视图:CREATE OR REPLACE VIEW 视图名(字段1,字段2,字段3) AS select 字段1,字段2,字段3 ......;
+
+   创建索引: https://blog.csdn.net/weixin_41697106/article/details/106211858
+
+   创建表：CREATE TABLE 表名(字段名 数据类型 [完整性约束条件],...)
+
+   修改列：
+     Mysql :
+       1.添加字段：         alter table 表名 add(aaa 字段类型 ,bbb 字段类型); 这样就添加了两个字段 aaa 、bbb 到表中。
+       2.修改字段名：      alter table 表名 change aaa ccc 字段类型 ；将 aaa 改名为 ccc  此处的字段类型 必须要加 。
+       3.修改字段类型：  alter table 表名  modify aaa 新字段类型； 将 aaa 的类型改为新字段类型；
+       4.删除字段 ：        alter table 表名  drop column aaa;
+     Oracle ：
+       1.添加字段 ：         alter table 表名 add(aaa 字段类型 ，bbb 字段类型);
+       2.修改字段 :            alter table 表名 rename aaa  to ccc 字段类型 ；
+       3.修改字段类型 ：   alter table 表名 modify aaa 字段类型  ;
+       4.删除字段 ：          alter table 表名 drop column aaa ；
+
+③.其他统计类功能 --- sql编写能力
+ 1.课程完成情况统计分析、学生成绩完成情况统计分析、高基表统计分析、主修毕业结论统计分析
+ 根据时间段统计各项数据，给一个表格然后按首行字段进行分组统计的同时再按首列字段内容进行分组，其中首列内容是动态的
+ 例如首列为男女、学历种类、七大洲、资助类型；首行为毕业人数，肄业人数，取得学位人数，1 2 3 4 5年级人数，预毕业，预科生等
+ 进行统计数据
+
+④.待办事务 --- 消息队列mq
+ 1.成绩管理、排课管理、调停课管理、学籍异动待办事务的开发
+   流程：
+
+⑤.其他工作任务
+

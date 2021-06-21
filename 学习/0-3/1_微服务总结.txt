@@ -1,0 +1,70 @@
+﻿一.微服务核心思想
+ -一个模块一个服务，使得项目更稳定，不会因为某部分模块出现问题就影响整个项目
+ -可以更合理的分配服务器资源，访问量数据量等需要更多资源的服务部署的服务器就可以分配更多的资源，
+  其他服务可以相应减小资源的分配
+ -当然维护成本和运维成本会相应提高
+
+二.springcloud五大组件
+1.注册中心：Eureka  http://www.heartthinkdo.com/?p=1933
+  -SpringCloud Eureka是SpringCloud集合中一个组件，它是对Euraka的集成，用于服务注册和发现。Eureka是Netflix中的一个开源框架。
+    它和 zookeeper、Consul一样，都是用于服务注册管理的，同样，Spring-Cloud 还集成了Zookeeper和Consul。
+    在项目中使用SpringCloud Euraka的原因是它可以利用Spring Cloud Netfilix中其他的组件，如zuul等，因为Euraka是属于Netfilix的。
+	
+  -Eureka由多个instance(服务实例)组成，这些服务实例可以分为两种：Eureka Server和Eureka Client。为了便于理解，
+   我们将Eureka client再分为Service Provider和Service Consumer。
+   Eureka Server 提供服务注册和发现
+    Service Provider 服务提供方，将自身服务注册到Eureka，从而使服务消费方能够找到
+    Service Consumer服务消费方，从Eureka获取注册服务列表，从而能够消费服务
+	
+  -Eureka与Zookeeper比较
+   首先介绍下cap原理
+    P:Partition tolerance,网络分区容错。类似多机房部署，保证服务稳定性。
+    A:Availability，可用性。
+    C:Consistency ，一致性。
+   CAP定理：CAP三个属性对于分布式系统不同同时做到。如AP/CP/AC。再来看Zookeepr区别：
+  Zookeeper是CP，分布式协同服务，突出一致性。对ZooKeeper的的每次请求都能得到一致的数据结果，
+   但是无法保证每次访问服务可用性。如请求到来时，zookeer正在做leader选举，此时不能提供服务，即不满足A可用性。
+  Euere是AP，高可用与可伸缩的Service发现服务，突出可用性。相对于Zookeeper而言，可能返回数据没有一致性，但是保证能够返回数据，服务是可用的。
+
+  -用于服务注册和发现，需先启动；其他服务启动后会把服务状态接口信息网络信息等，注册到注册中心；
+  
+  -注册中心服务端和客户端会建立心跳连接，默认每个30s确认连接状态90s无确认连接即记为服务断开连接；
+  
+  -服务与服务间的调用者是经过注册中心获取被调用者的相关信息与位置等
+  
+  -启动类注解 @EnableEurekaServer、@EnableEurekaClient
+  
+  
+2.网关zuul gateway  https://blog.csdn.net/qq_41402200/article/details/94333830
+
+ - 什么是网关：https://www.jianshu.com/p/662c214ccfe4
+ - routes:路由（routes：路由，它由唯一标识（ID）、目标服务地址（uri）、
+       一组断言（predicates）和一组过滤器组成（filters）。filters 不是必需参数。）,
+       网关转发在uri、predicates、filters下实现，限流和熔断在filters下实现
+ - gateway具体用法看gateway-demo的application.yml
+
+  
+3.ribbon与feign
+区别：-ribbon的使用需要声明
+      @Bean
+      @LoadBalanced
+      public RestTemplate restTemplate(){
+           return new RestTemplate();
+      }，然后restTemplate....
+      feign需要在启动类加注解@EnableFeignClients
+      -然后编写类似service的接口用注解@FeignClients(value='服务名',fallback=xx.class)标注，其中fallback为编写对应降级处理的方法；
+      （调用方式不同，Ribbon需要自己构建http请求，模拟http请求然后使用RestTemplate发送给其他服务，步骤相当繁琐。
+       Feign则是在Ribbon的基础上进行了一次改进，采用接口的方式，将需要调用的其他服务的方法定义成抽象方法即可。
+       不需要自己构建http请求。不过要注意的是抽象方法的注解，方法签名要和提供服务的方法完全一致。）
+      -Feign默认集成了Ribbon，同时更加容易与springcloud的其他组件集成，例如默认集成了断路器hystrix，只需在配置文件开启hystrix
+
+共同点：都支持负载均衡，可通过配置文件配置使用特定的负载均衡器，也可以自定义负载均衡器。
+
+4.断路器hystrix   https://blog.csdn.net/wangxy_job/article/details/106669742
+
+
+5.配置中心config
+ 用法看项目。
+
+
+

@@ -1,0 +1,71 @@
+常用sql知识：
+   用到的一些数据库里的函数有，decode(字段，(if)条件1，结果1，(else if)条件2，结果2，...,(else)不满足所有条件时的结果)
+   多行数据合并一行 listagg(字段名,',') within group (order by 字段名)，
+   多列数据拼接 concat('aa','bb')/concat(concat('aa','bb'),'cc')最多两个参数，'a'||'b':拼接 'ab'
+                substr(字段名,1,4) 从第一个字符开始截取四个
+                to_char(字段名）,case语句，replace(dmmc,'广东省'，'') dmmc里的广东省字样用''替换
+                a between b and c --> b<=a<c , length(ZYJSZWM)字段长度
+   计算类函数 round(X,y) 四舍五入保留y位小数,sum(X),min(),max(),avg(),to_number(X),count(1),
+               nvl(X,0) if X==NULL,'' nvl(X,0)=0 else nvl(X,0)=X,
+               格式：NULLIF (expr1, expr2) 含义：相等返回NULL，不等返回expr1
+   日期类函数 to_char(字段名，'yyyy-MM-dd'),yyyy-mm-dd为格式,还有yyyy-MM-dd hh:mi:ss、yyyy-MM-dd hh24:mi:ss等
+              to_date(字段名，'yyyy-MM-dd')，获取上一个月上一年上一天的日期函数是什么
+              注意：在转化为DATE类型的时候一定要注意前后两个参数的格式，前后格式必须保持一致，否则会出错。
+
+   sql中临时表
+     with temp1 as (sql查询语句),temp2 as (sql查询语句) select * from temp1
+   关键字：distinct, union all 前后两条sql结果集全部合并 / union 前后两条sql结果集合并,值一样的只显示一条
+           in与not in,exists与not exists（外层结果集很大时最好不要使用not exists，甚至exists）
+             如果查询的两个表大小相当，那么用in和exists差别不大；如果两个表中一个较小一个较大，则子查询表大的用exists，子查询表小的用in；
+               select * from A where cc in(select cc from B)　　-->效率低，用到了A表上cc列的索引；A.length*B.length次遍历
+               select * from A where exists(select cc from B where cc=A.cc)　　-->效率高，用到了B表上cc列的索引。A.length次查询数据库
+               因为in()是在内存里遍历比较，而exists()需要查询数据库，我们都知道查询数据库所消耗的性能更高，而内存比较很快。
+             无论哪个表大，用not exists都比not in 要快。
+               查询语句使用了not in，那么对内外表都进行全表扫描，没有用到索引；而not exists的子查询依然能用到表上的索引。所以无论哪个表大，用not exists都比not in 要快。
+               select b.XSSFBS,b.xm,a.* from temp a
+                   left join T_JW_XJGL_XSJBXX b on b.xh=a.xh
+                   left join temp2 c on a.xjydxx_id=c.xjydxx_id
+                   where c.xjydxx_id is null -- 左连接代替not exists 代替 not in 范例
+                 -- select b.XSSFBS,b.xm,a.* from temp a left join T_JW_XJGL_XSJBXX b on b.xh=a.xh
+                 -- where not exists (select 1 from temp2 b where a.xjydxx_id=b.xjydxx_id)
+   order by 字段名 desc/asc nulls last/first
+   sql语句执行效率问题：where 字句的顺序，in/exist的选择，涉及到数据量很多的表一般必须要建索引（where字句的列）
+   破坏索引的情况要注意，尽量避免用子查询
+   inner join/left join/right join/full join
+   表授权：grant  <权限>  on  表名[(列名)]  to  用户 With  grant  option
+           或 grant <权限> ON <数据对象> to <数据库用户>
+       //数据对象可以是表名或列名
+       //权限表示对表的操作，如select,update,insert,delete
+       注：授权命令是由数据库管理员使用的，若给用户分配权限时带With  grant  option子句，
+           则普通用户获权后,可把自己的权限授予其他用户
+   回收权限 revoke
+     REVOKE <权限> ON <数据对象>  FROM <数据库用户名>
+
+   创建视图:CREATE OR REPLACE VIEW 视图名(字段1,字段2,字段3) AS select 字段1,字段2,字段3 ......;
+
+   创建索引: https://blog.csdn.net/weixin_41697106/article/details/106211858
+
+   创建表：CREATE TABLE 表名(字段名 数据类型 [完整性约束条件],...)
+
+   修改列：
+     Mysql :
+       1.添加字段：         alter table 表名 add(aaa 字段类型 ,bbb 字段类型); 这样就添加了两个字段 aaa 、bbb 到表中。
+       2.修改字段名：      alter table 表名 change aaa ccc 字段类型 ；将 aaa 改名为 ccc  此处的字段类型 必须要加 。
+       3.修改字段类型：  alter table 表名  modify aaa 新字段类型； 将 aaa 的类型改为新字段类型；
+       4.删除字段 ：        alter table 表名  drop column aaa;
+     Oracle ：
+       1.添加字段 ：         alter table 表名 add(aaa 字段类型 ，bbb 字段类型);
+       2.修改字段 :            alter table 表名 rename aaa  to ccc 字段类型 ；
+       3.修改字段类型 ：   alter table 表名 modify aaa 字段类型  ;
+       4.删除字段 ：          alter table 表名 drop column aaa ；
+
+数据库基础知识（记得看一下数据库的相关锁，事务）：
+https://blog.csdn.net/qq_35642036/article/details/89554721
+事务隔离级别-锁情况
+https://www.cnblogs.com/liuleicode/p/5796642.html?utm_source=debugrun&utm_medium=referral
+sql的优化（防止索引无效）：https://www.cnblogs.com/woxbwo/p/11538080.html
+
+索引：主键索引，唯一索引，单例索引（普通索引）
+
+
+

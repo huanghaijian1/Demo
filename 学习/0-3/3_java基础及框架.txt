@@ -1,0 +1,327 @@
+一.java基础
+ 1.集合 List set Map（性能，优缺点，底层数据结构，原理，线程安全问题，扩容问题）
+     https://blog.csdn.net/oxl9235/article/details/106118656
+     https://blog.csdn.net/qichangjian/article/details/87618758 扩容
+   字符串 String,StringBuffer,StringBulider,拼接，存储的过程与原理
+     https://www.cnblogs.com/jiading/articles/12562881.html
+     String '+' 拼接会先转换传StringBuilder,再append进行拼接，最后toString返回String
+     StringBuilder调用append返回会判断拼接后字符串长度是否大于用于存放字符的char[] value的长度（value.length默认16），
+     new StringBuilder(str)时char[] value的长度则str.length+16，
+     大于则扩容（需创建一个新的char[] copy 并把copy赋值给原来存放字符的char[] value）
+     大量字符拼接时（for循环拼接），最好能在创建StringBuilder时自动容量，避免过多的扩容
+ 2.浮点数运算、比较大小 用BigDecimal
+ 3.io流  https://blog.csdn.net/sinat_37064286/article/details/86537354
+   我用过的：
+    File、
+    outputStream、FileOutputStream、ByteArrayOutputStream、BufferedInputStream、MappedByteBuffer
+    inputStream、FileInputStream、ByteArrayInputStream、BufferedOutputStream
+    ZipInputStream/ZipOutputStream/ZipEntry等
+ 4.多线程
+   -线程基础知识
+        https://www.cnblogs.com/zrtqsk/p/3776328.html
+   -各种锁的了解（深入了解）
+     锁优化的总结： 1、避免死锁  2、减小锁的持有时间  3、减小锁的粒度  4、锁的分离
+                    5、尽量使用无锁的操作，如原子操作(Atomic系列类),volatile关键字
+     锁的读写分离：读读共享，写写互斥。读写互斥。
+       ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
+       ReentrantReadWriteLock.ReadLock rLock = rwLock.readLock();//读锁
+       ReentrantReadWriteLock.WriteLock wLock = rwLock.writeLock();//写锁
+     公平锁/非公平锁、乐观锁（CAS）/悲观锁、redis分布式锁、zookeeper分布式锁......   这些锁的使用与锁的状态
+     ReentrantLock：可重入锁，互斥锁，悲观锁，可中断
+     synchronized：可重入锁，同步锁，悲观锁，不可中断
+     可重入锁：同一个线程重复请求由自己持有的锁对象时，可以请求成功而不会发生死锁。
+     公平锁：Lock lock = new ReentrantLock(true)
+     非公平锁:synchronized,Lock lock = new ReentrantLock(),Lock lock = new ReentrantLock(false)
+                      //三种获取锁的方法
+                     lock.lock();//不支持中断，获取不到锁就会一直阻塞，可能造成死锁
+                     lock.lockInterruptibly();//支持中断，获取锁过程，若其它线程调用该线程的interrupt()中断,则该线程而直接返回
+                     if(lock.tryLock()){//或者lock.tryLock(5,TimeUnit.SECONDS)
+                     //获取锁并返回true false,也支持中断
+
+                     }else{
+
+                     }
+                     try{...}catch(...){...}finally{lock.unlock()}//释放锁
+     乐观锁（CAS）：借助java.util.concurrent.atomic包下的原子类AtomicXXX(例如AtomicInteger)把乐观锁应用到项目中
+     -CAS是什么?全称compare and swap，一个CPU原子指令，在硬件层面实现的机制，体现了乐观锁的思想。
+     -JVM用C语言封装了汇编调用。Java的基础库中有很多类就是基于JNI调用C接口实现了多线程同步更新的功能。
+     -原理:CAS有三个操作数：当前主内存变量的值V，线程本地变量预期值A，线程本地待更新值B。
+          当需要更新变量值的时候，会先获取到内存变量值V然后很预期值A进行比较，如果相同则更新为B（版本号要一致），
+          如果不同，则将最新的变量值更新到预期值中再重新尝试上面的步骤，直到成功为止。
+     -那么CAS有什么缺点需要注意？
+         1.ABA问题：我内存对象从A变成B在变成A，CAS会当成没有变化，进而去更新值，实际是有变化的。
+         2.循环时间开销大：一直和预期值不对的情况下，会一直循环。
+         3.只能保证一个共享变量的原子操作。
+     -使用场景：因为乐观锁使用递归+版本号控制实现，所以，如果线程冲突几率大，使用乐观锁会重复很多次操作（包括查询数据库），
+               尤其是递归部分逻辑复杂，耗时和耗性能，是低效不合适的，应考虑使用悲观锁。
+           乐观锁悲观锁的选择：
+             乐观锁：并发冲突几率小，对应模块递归操作简单时使用
+             悲观锁：并发几率大，对应模块操作复杂时使用
+      -其他说明:1.对应数据库表设计时，需要往表里加一个version字段。每次查询时，查出带有version的数据记录，
+                  更新数据时，判断数据库里对应id的记录的version是否和查出的version相同。
+                  若相同，则更新数据并把版本号+1；若不同，则说明，该数据发送并发，
+                  被别的线程使用了，进行递归操作，再次执行递归方法，知道成功更新数据为止。
+                 2.实现了一个乐观锁，作用是冲数据库里更新一条数据病返回前端。如果并发率大，
+                   一次请求可能则会重复执行很多次automaticAssign，则性能低。如果并发很乐观，用户请求少，
+                   则不需要用synchronized，多线程时性能高。
+      -volatile关键字：
+	             volatile关键字的两层语义
+　　              一旦一个共享变量（类的成员变量、类的静态成员变量）被volatile修饰之后，那么就具备了两层语义：
+　　              1）保证了不同线程对这个变量进行操作时的可见性，即一个线程修改了某个变量的值，这新值对其他线程来说是立即可见的。
+　　              2）禁止进行指令重排序。
+
+     分布式锁：https://www.cnblogs.com/seesun2012/p/9214653.html
+      -数据库乐观锁：
+
+      -redis分布式锁：
+         Redission 分布式锁:https://blog.csdn.net/qq_33363618/article/details/88783766?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.baidujs&dist_request_id=1331647.13360.16184140521892503&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.baidujs
+         用redis Redission分布式锁处理业务时最好在数据库里定义一个唯一列值为处理业务名，处理完后再把该列的值置空
+
+      -zookeeper分布式锁：
+        https://blog.csdn.net/sunfeizhi/article/details/51926396
+        里面的ZkClientExt为自定义的类，继承自ZkClient
+        //创建zk
+        protected ZkClient zkClient = new ZkClient(ZK_ADDR, SESSION_TIMEOUT)
+        redis分布式锁，其实需要自己不断去尝试获取锁，比较消耗性能
+        zookeeper分布式锁，获取不到锁，注册个监听器即可，不需要不断主动尝试获取锁，性能开销较小
+        另外一点就是，如果是redis获取锁的那个客户端bug了或者挂了，那么只能等待超时时间之后才能释放锁；而zk的话，因为创建的是临时znode，只要客户端挂了，znode就没了，此时就自动释放锁
+   -各种线程池的用法以及其原理（深入了解）
+            https://www.jianshu.com/p/f030aa5d7a28
+            https://blog.csdn.net/javazejian/article/details/77410889
+            https://blog.csdn.net/u014799292/article/details/90167096
+            https://blog.csdn.net/USTC_Zn/article/details/54864244?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.baidujs&dist_request_id=1329188.8887.16178936911542405&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.baidujs
+      ThreadPoolExecutor： ThreadPoolExecutor构造函数参数的了解、java并发之阻塞队列LinkedBlockingQueue与ArrayBlockingQueue、
+                           线程池里是怎么创建线程、线程返回值问题
+      ·核心线程数，最大线程数，空线程消耗等待时间极其单位
+         线程数小于等于核心线程数：有任务过来就创建新线程
+         线程数大于等于核心线程数小于最大线程数：有任务过来先判断是否有空闲线程，有则用空闲线程执行，无则加入到阻塞队列自动有课执行任务的线程，
+            若阻塞队列满了也没空闲线程则继续创建线程
+         线程数大于最大线程数：有任务过来就先插入到阻塞队列，若阻塞队列已满则直接拒绝执行
+         当线程数大于核心线程数：空闲线程过了指定时间长度还处于空闲状态，则销毁之
+      ·阻塞队列
+        ArrayBlockingQueue：存放数据的数据结构是数组，有界阻塞队列，读写线程是用ReenterLock和两个条件读写控制
+        LinkedBlockingQueue：存放数据的数据结构是链表，无界阻塞队列但也可知道队列大小，读写线程是用putLock,takeLock两个锁
+                             并实现了锁分离和两个条件读写控制，所以吞吐量比ABQ大，但因读写数据时需要额外创建和销毁node节点对象
+                             所消耗的资源就比较多
+      ·ThreadFactory线程池中创建线程的工程
+        线程池底层是怎么创建线程的？ ---Worker、addWorker、run、runWork
+         线程池创建时会初始化一个Worker对象，当有任务时，Worker对象调用run方法，run()里也会调用runWork()创建线程
+         其中：当线程数大于线程池核心线程数时，若无空闲线程任务会先进入等待队列，而Worker会调用getTask()导致阻塞
+         直到在等待队列获取到任务，然后再调用addWorker()看是否有空闲线程有就让空闲线程执行任务，无则创建线程（调用run(),run()调用runWork()创建线程）
+               https://blog.csdn.net/qq_27276045/article/details/106774674
+        默认工厂：Executors.defaultThreadFactory()
+        自定义工厂：new ThreadFactory(){
+                       @Override
+                       public Thread newThread(Runnable r){//r也需要自定义
+                          Thread t = new Thread(r);
+                          ...
+                          return t;
+                       }
+                    }
+                    最好自己写一个实现ThreadFactory接口的子类作为创建线程的工厂
+         自定义ThreadFactory可以根据线程池究竟何时创建了多少线程，也可以自定义线程的名称、组以及优先级等信息，
+         甚至可以任性的将线程设置为守护线程。总之，自定义ThreadFactory可以更加自由的设置线程池中所有线程的状态。
+
+      ·拒绝策略 https://blog.csdn.net/weixin_48502062/article/details/106682658
+         简单回答：
+         中止策略：无特殊场景(默认用的这个)：
+         丢弃策略：无关紧要的任务
+         弃老策略：发布消息。
+         调用者运行策略：不允许失败场景（对性能要求不高、并发量较小），另起线程去执行被拒绝的任务。
+
+      -线程返回值问题
+       1.通过Callable接口实现线程：通过FutureTask（task.get()获取返回值，该方法会阻塞当前线程）
+          public class MyCallable implements Callable<String> {
+              @Override
+              public String call() throws Exception{
+                  String value="test";
+                  System.out.println("Ready to work");
+                  Thread.currentThread().sleep(5000);
+                  System.out.println("task done");
+                  return  value;
+              }
+              public static void main(String[] args) throws ExecutionException, InterruptedException {
+                  FutureTask<String> task = new FutureTask<String>(new MyCallable());
+                  new Thread(task).start();
+                  if(!task.isDone()){
+                      System.out.println("task has not finished, please wait!");
+                  }
+                  System.out.println("task return: " + task.get());
+              }
+          }
+       2.线程池获取（线程池的提交任务方法：submit方法有返回值（实现Callable<X>的线程,X为call方法返回值类型），
+                                           execute则无返回值（实现Runnable的线程），submit()里调用了execute）
+         public class MyCallable implements Callable<String> {
+             @Override
+             public String call() throws Exception{
+                 String value="test";
+                 System.out.println("Ready to work");
+                 Thread.currentThread().sleep(5000);
+                 System.out.println("task done");
+                 return  value;
+             }
+             public static void main(String[] args) {
+                 ExecutorService newCachedThreadPool = Executors.newCachedThreadPool();
+                 Future<String> future = newCachedThreadPool.submit(new MyCallable());
+                 if(!future.isDone()){
+                     System.out.println("task has not finished, please wait!");
+                 }
+                 try {
+                     System.out.println(future.get());
+                 } catch (Exception e) {
+                     e.printStackTrace();
+                 }finally {
+                     newCachedThreadPool.shutdown();
+                 }
+             }
+         }
+       3.使用Thread类的join()阻塞当前线程以等待子线程处理完毕
+    线程池的作用：
+    （1）利用线程池管理并复用线程、控制最大并发数等。
+    （2）实现任务线程队列缓存策略和拒绝机制。
+    （3）实现某些与时间相关的功能，如定时执行、周期执行等。
+    （4）隔离线程环境。比如，交易服务和搜索服务在同一台服务器上，分别开启两个线程池，交易线程的资源消耗明显要大；
+         因此，通过配置独立的线程池，将较慢的交易服务与较快的搜索服务隔离开，避免各自服务线程相互影响。
+
+   -并发编程 ***用消息队列处理高并发是很好的方法（削峰）
+    常用的并发包下的类：ExecutorService,ThreadPoolExecutor，ThreadFactory，ArrayBlockingQueue，LinkedBlockingQueue,
+                        CountDownLatch,ConcurrentHashMap,CopyOnWriteArrayList,CopyOnWriteArraySet ......
+
+    线程池的使用
+          ThreadPoolExecutor-自定义，更好地契合场景要求
+    线程安全对象
+      * XXX<Y> coll = Collections.synchronizedXXX(new XXXX<>());//XXX为抽象集合，例如：List/Map; XXXX为XXX子类
+       例如：Collections.synchronizedList(new LinkedList<>());Collections.synchronizedMap(new HashMap<K, V>());
+
+      * new CopyOnWriteArrayList();/new CopyOnWriteArraySet();/自定义的CopyOnWriteMap/ConcurrentHashMap
+
+    相关并发工具类
+       并发工具类java.util.concurrent包下CountDownLatch
+        用法：CountDownLatch latch = new CountDownLatch(count);//count 线程数
+              然后再子线程执行完后调用 latch.countDown(); //未完成线程数减一
+              最后在主线程调用 latch.await()/latch.await(long timeout, TimeUnit unit)
+                //线程都完成后count变为0后程序才可继续执行/指定时间内count不变为0，继续执行程序
+
+ 5.jdk8新特性
+
+ 6.jvm
+
+二.后端框架知识
+1.springboot+spring+springmvc+mybatis/hibernate
+ --springmvc默认单例可通过@Scope("prototype")改为多例，单例时所有线程（包括不同用户不同机器访问）共用成员变量
+   1核心控制器，2适配器映射器，3处理器映射器，4视图渲染，每一步完成都先返回核心控制器然后再到下一步
+ --mybatis：https://blog.csdn.net/a745233700/article/details/80977133
+ --spring:https://www.cnblogs.com/yanggb/p/11004887.html
+    ThreadLocal 线程局部 (thread-local) 变量的使用
+    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()  设置手动回滚。
+    @transactional为什么失效
+    spring扫描到@transactional生成代理类，有@transactional会调用 startTransaction();
+    class proxy$A{
+        A objectA = new A();
+        method b(){    //标记2
+            startTransaction();
+            objectA.b();//原来那个类的b方法
+        }
+        method a(){    //标记3
+            objectA.a();    //由于a()没有注解，所以不会启动transaction，而是直接调用A的实例的a()方法
+        }
+    }
+    1、检查你方法是不是public的
+    2、你的异常类型是不是unchecked异常
+    如果我想check异常也想回滚怎么办，注解上面写明异常类型即可
+    @Transactional(rollbackFor=Exception.class)
+    类似的还有norollbackFor，自定义不回滚的异常
+    3、数据库引擎要支持事务，如果是MySQL，注意表要使用支持事务的引擎，比如innodb，如果是myisam，事务是不起作用的
+    4、是否开启了对注解的解析
+    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+    5、spring是否扫描到你这个包，如下是扫描到org.test下面的包
+    <context:component-scan base-package="org.test" ></context:component-scan>
+    6、检查是不是同一个类中的方法调用（如a方法调用同一个类中的b方法）
+    7、异常是不是被你catch住了
+2.springboot+rabbitMq、Springboot2 + Shiro + Redis + Jwt 前后端分离整合、定时任务调度_spring quartz
+①springboot+rabbitMq(相关配置参数看portalserver-demo配置文件)
+简单使用：https://blog.csdn.net/typ1805/article/details/82835318
+          https://blog.csdn.net/qq_35387940/article/details/100514134
+面试题：https://zhuanlan.zhihu.com/p/139918749
+综合：https://www.cnblogs.com/ithushuai/p/12443460.html
+rabbitmq可实现流量削峰，限流，分布式事务
+ -直型交换机DirectExchange，扇形交换机FanoutExchange，主题交换机TopicExchange
+ -配置确认回调 要在配置文件先配置对应属性才生效
+  找到交换机找不到队列，ConfirmCallback，ReturnCallback回调都会触发
+  交换机队列都找不到，都找得到（消息推送成功），找不到交换机：只触发ConfirmCallback
+  生产者：（消费者的看https://blog.csdn.net/qq_35387940/article/details/100514134）
+  @Configuration
+  public class RabbitConfig {
+      @Bean
+      public RabbitTemplate createRabbitTemplate(ConnectionFactory connectionFactory){
+          RabbitTemplate rabbitTemplate = new RabbitTemplate();
+          rabbitTemplate.setConnectionFactory(connectionFactory);
+          //设置开启Mandatory,才能触发回调函数,无论消息推送结果怎么样都强制调用回调函数
+          rabbitTemplate.setMandatory(true);
+          rabbitTemplate.setConfirmCallback(new RabbitTemplate.ConfirmCallback() {
+              @Override
+              public void confirm(CorrelationData correlationData, boolean ack, String cause) {
+                  System.out.println("ConfirmCallback:     "+"相关数据："+correlationData);
+                  System.out.println("ConfirmCallback:     "+"确认情况："+ack);
+                  System.out.println("ConfirmCallback:     "+"原因："+cause);
+              }
+          });
+          rabbitTemplate.setReturnCallback(new RabbitTemplate.ReturnCallback() {
+              @Override
+              public void returnedMessage(Message message, int replyCode, String replyText, String exchange, String routingKey) {
+                  System.out.println("ReturnCallback:     "+"消息："+message);
+                  System.out.println("ReturnCallback:     "+"回应码："+replyCode);
+                  System.out.println("ReturnCallback:     "+"回应信息："+replyText);
+                  System.out.println("ReturnCallback:     "+"交换机："+exchange);
+                  System.out.println("ReturnCallback:     "+"路由键："+routingKey);
+              }
+          });
+          return rabbitTemplate;
+      }
+  }
+  -多生产者多消费者（生产方法多写几个，消费方法多写几个就是多生产者多消费者）
+    默认情况下，RabbitMQ会将每个消息依次发送给下一个消费者，每个消费者收到的消息数量其实是一样的，
+    我们把这种分发消息的方式称为轮训分发模式。
+    负载均衡分发消息
+  -流量削峰，限流
+    @Configuration
+    public class RabbitMqConfiguration {
+    	/*
+    	 * 削峰限流
+    	 */
+    	@Bean
+    	public Queue limitQueue() {
+    		//设置队列的初始化参数
+    		Map<String, Object> map = new HashMap<String, Object>();
+    		//指定消息队列的长度
+    		map.put("x-max-length", 100);
+    		//当队列满时，多余的消息直接拒绝接收，多余的消息被丢弃
+    		map.put("x-overflow", "reject-publish");
+    		/*
+    		 * 参数1：队列的名字
+    		 * 参数2：是否为持久队列，及时rabbitmq服务停机，之后在开机该队列也存在  一般队列默认都是持久的
+    		 * 参数3：是否为排他队列，是否只能由自己可见（admin），其他用户看不到该队列
+    		 * 参数4：是否在不适用该队列是删除该队列
+    		 * 参数5：队列初始化的参数
+    		 */
+    		return new Queue("limit_queue",true,false,false,map);
+    		//return new Queue("limit_queue");
+    	}
+    	@Bean
+    	public FanoutExchange limitExchange() {
+    		return new FanoutExchange("limit_exchange");
+    	}
+    	@Bean
+    	public Binding bindingLimitQueueToLimitExchange(Queue limitQueue,FanoutExchange limitExchange) {
+    		return BindingBuilder.bind(limitQueue).to(limitExchange);
+    	}
+    }
+  -分布式事务 rabbitmq实现
+  https://blog.csdn.net/mengfanzhundsc/article/details/90813642?utm_medium=distribute.pc_relevant.none-task-blog-baidujs_baidulandingword-0&spm=1001.2101.3001.4242
+  https://blog.csdn.net/weixin_42351206/article/details/108546346?utm_medium=distribute.pc_relevant.none-task-blog-baidujs_baidulandingword-0&spm=1001.2101.3001.4242
+
+②Springboot2 + Shiro + Redis + Jwt 前后端分离整合
+
+③定时任务调度_spirng quartz
+
+

@@ -1,0 +1,15 @@
+一.react 4.x  es6  https://blog.csdn.net/eyeofangel/article/details/88797314
+重点：0.什么是react
+      1.real dom 与 virtual dom的区别，react采用的是virtual dom,单向数据绑定
+      2.react的周期函数
+      3.父子组件数据的传递方式
+      4.箭头函数
+      5.常用组件、库有哪些（结合中大本科教务系统举例说明其用法）
+
+二.vue2.x
+重点：0.什么是vue
+      1.real dom 与 virtual dom的区别，vue采用的是virtual dom,双向数据绑定
+      2.vue的周期函数
+      3.父子组件数据的传递方式
+      4.箭头函数
+      5.常用组件、库、指令有哪些

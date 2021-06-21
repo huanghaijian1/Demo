@@ -1,0 +1,80 @@
+1.group by 的优化
+     -后面字段加索引
+     -group by后面有一个静态排序，可以在这方面进行优化
+  order by优化  后面字段加索引
+
+2.在 select 前面加指定关键字，能知道sql执行那里慢了（定位及优化SQL语句的性能问题）
+  https://blog.csdn.net/w372426096/article/details/82421378
+  explain+sql语句
+
+3.synchronized底层是怎么实现的
+
+4.线程的状态有哪些，不止我知道的那几个
+  等待-sleep(),wait(),join() 超时等待-sleep(long),wait(long),join(long)
+
+5.springcloud alibaba 代替 springcloud Netflix，详细补一下springcloud alibaba，也看一下另一个注册中心consul
+  -https://blog.csdn.net/ron03129596/article/details/109019400  nacos配置中心
+  -springcloud alibaba的入门
+      -https://blog.csdn.net/L_limo/article/details/108832811
+      nacos = 注册中心 + 配置中心 + ribbon
+
+6.elasticsearch,简称es;
+学习博客：
+https://www.cnblogs.com/sunsky303/p/9438737.html
+https://cloud.tencent.com/developer/article/1573013
+
+
+7.微服务中的登录方法-先看一下中大教务系统的登录
+*********在中大工作时优先学习这个*********
+登录处理步骤：
+1.检查是否已经登录
+2.1为否，获取clientIp，浏览器userAgent，
+  然后对loginPattern+userAgent+clientIp进行加密DigestUtils.md5Hex(data).substring(8, 24)
+3.检查当前登录用户是否被冻结
+4.是否开启验证码二次校验，校验验证码（验证码验证成功后,免验证码校验的时间，保存到redis上有效时间3分钟）
+5.用户认证，并返回用户信息
+6.根据用户名获取加密后的密码并与时间戳一起再次加密成token_temp，与前端传过来的token比较，一样则登录成功
+7.移除指定登录用户锁
+8.登录后操作：
+-JavaWeb设置session失效时间的三种方法以及setMaxInactiveInterval()的注意事项
+  https://blog.csdn.net/MaYuKang/article/details/90731186
+  request.getSession().setMaxInactiveInterval(timeout);
+  SessionUtil.saveSystemUserInfo(request, systemUserInfo); ==>request.getSession().setAttribute("system-user", JsonUtil.obj2json(obj));
+  用户信息保存到request
+
+-response.addCookie(cookie);用户信息保存到cookie
+-添加登录日志（日志服务）
+
+-往在线用户表插入数据 T_JW_XTGL_ZXYHXX（若重复登录，则把先前的在线数据设置为不在线，新增一条该用户在线的数据）
+  在线用户表：id，账号登录名，用户类型，用名真实姓名，登录机器ip，登录时间，电脑版本，浏览器类型，是否在线
+ 并将用户账号添加到redis sorted set类型的集合里 zadd命令 redisTemplate.opsForZSet().add("currentUserIdList", onlUserNumber, nowtime);
+
+-登出操作，把在线用户表信息设为不在线，并redisTemplate.opsForZSet().remove("currentUserIdList", onlUserNumber);
+-定时器，每30分钟清理在线用户，修改T_JW_XTGL_ZXYHXX.SFZX='1'改为0（redis存在的用户id不清楚）
+
+-分布式项目登录后用户信息保存在哪里
+spring session通过redis存储，实现session共享 maven引入spring-session-data-redis，spring session就与redis实现了整合
+启动时要有@EnableRedisHttpSession才生效，可写在要共享的服务的启动类上，同时该服务要连接对应redis
+但我们这里是封装好的在maven引入对应依赖com.ly.education education-session与spring-session-data-redis即可。
+request.getSession(false)?是什么意思？？？
+ request.getSession(true)：若该request存在会话则返回该会话，否则新建一个会话。
+ request.getSession(false)：若该request存在会话则返回该会话，否则返回null
+
+-登录后请求如何鉴权
+ 在网关的自定义过滤器做权限校验，通过当前请求url与用户信息里的权限uri列表做对比，相关数据权限在其他服务上处理
+
+8.redis面试题
+https://www.cnblogs.com/jasontec/p/9699242.html
+redis常见命令：https://blog.csdn.net/ithomer/article/details/9213185/
+
+9.消息队列kafka的学习
+https://www.cnblogs.com/fishpro/p/12784514.html
+https://blog.csdn.net/oschina_40730821/article/details/108619389
+
+
+10.linux基本命令
+
+
+11.docker的学习
+
+
