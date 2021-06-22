@@ -1,0 +1,8 @@
+一.在github上创建一个仓库
+二.在代码目录下 
+    1.git init      -把这个项目变成一个Git可以管理的仓库，在目录下新建了.git的隐藏文件夹
+    2.把要忽略的文件配置好
+    3.git add .    -把目录下的文件加入到git管理
+    4.git commit -m "first commit"    -将代码提交到本地git仓库
+    5.git remote add origin 自己仓库地址  -将代码和github上的仓库绑定
+    6.git remote add origin 自己仓库地址  -将代码提交到github远程仓库
