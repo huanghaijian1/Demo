@@ -5,7 +5,11 @@ import com.alibaba.excel.enums.CellExtraTypeEnum;
 import com.example.demo.complexImport.example1.BigDateExcelListener;
 import com.example.demo.complexImport.example2.EasyExcelUtil;
 import com.example.demo.complexImport.example3.UploadDataListener;
+import com.example.demo.domain.response.InternalResponse;
 import com.example.demo.service.BasicService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,9 +18,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@Api(tags = {"测试easyExcel"})
 @RestController
 public class ImportController {
 
@@ -28,8 +33,9 @@ public class ImportController {
 
 
     //导入excel
-    @RequestMapping(value = "excelImport", method = {RequestMethod.GET, RequestMethod.POST })
-    public String excelImport(HttpServletRequest request,MultipartFile[] files) throws Exception {
+    @ApiOperation("1-测试easyExcel")
+    @PostMapping(value = "excelImport")
+    public String excelImport(HttpServletRequest request,@ApiParam("1-上传文件")MultipartFile[] files) throws Exception {
         File file2 = new File("d://test2.xls");
 
         Map<String, Object> result = EasyExcelUtil.readExcel(file2, new TestModel(), 1);
@@ -76,8 +82,9 @@ public class ImportController {
      * @return
      * @throws IOException
      */
-    @RequestMapping(value = "/importBasic")
-    public String importBasic(MultipartFile file) throws IOException {
+    @ApiOperation("2-测试easyExcel")
+    @PostMapping(value = "/importBasic")
+    public InternalResponse importBasic(@ApiParam("上传文件") MultipartFile file) throws IOException {
 //        BigDateExcelListener basicExcelListener=new BigDateExcelListener(basicService);
         UploadDataListener basicExcelListener = new UploadDataListener();
         InputStream input = new FileInputStream(new File("d://test22.xls"));
@@ -87,7 +94,13 @@ public class ImportController {
         EasyExcel.read(input,com.example.demo.complexImport.example3.TestModel.class, basicExcelListener).sheet("表-09 综合单价分析表").headRowNumber(0).doReadSync();
 
         input.close();
-        return "导入成功";
+        Map<String,String> result = new HashMap<>();
+        result.put("message","");
+        result.put("code","200");
+        result.put("data","导入成功");
+
+        return InternalResponse.success().withBody(result);
+
     }
 
 }

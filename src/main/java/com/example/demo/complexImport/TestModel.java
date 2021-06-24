@@ -3,13 +3,15 @@ package com.example.demo.complexImport;
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.metadata.BaseRowModel;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 @Data
-@Getter
-@Setter
 public class TestModel extends BaseRowModel{
 
 //    @ExcelProperty(value = "姓名", index = 0)
@@ -27,10 +29,13 @@ public class TestModel extends BaseRowModel{
 //
     @ExcelProperty(index = 0)
     private String xm;
+
     @ExcelProperty(index = 1)
     private String wxh;
+
     @ExcelProperty(index = 2)
     private String sjh;
+
     @ExcelIgnore
     private Integer rowNum;
 
