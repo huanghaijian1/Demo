@@ -5,8 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.1</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <version>2.2.0.RELEASE</version>
     </parent>
     <groupId>com.example</groupId>
     <artifactId>demo</artifactId>
@@ -18,26 +17,26 @@
     </properties>
     <dependencies>
 
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
-            <version>5.3.2</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>cn.hutool</groupId>-->
+            <!--<artifactId>hutool-all</artifactId>-->
+            <!--<version>5.3.2</version>-->
+        <!--</dependency>-->
 
 
-        <!-- https://mvnrepository.com/artifact/org.elasticsearch.client/elasticsearch-rest-high-level-client -->
-        <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>elasticsearch-rest-high-level-client</artifactId>
-        </dependency>
+        <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.elasticsearch.client/elasticsearch-rest-high-level-client &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>org.elasticsearch.client</groupId>-->
+            <!--<artifactId>elasticsearch-rest-high-level-client</artifactId>-->
+        <!--</dependency>-->
 
 
-        <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-elasticsearch -->
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-elasticsearch</artifactId>
-            <version>4.0.1.RELEASE</version>
-        </dependency>
+        <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.springframework.data/spring-data-elasticsearch &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>org.springframework.data</groupId>-->
+            <!--<artifactId>spring-data-elasticsearch</artifactId>-->
+            <!--<version>4.0.1.RELEASE</version>-->
+        <!--</dependency>-->
 
 
         <dependency>
@@ -65,6 +64,22 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- 配置springBoot的elasticsearch启动器 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+        </dependency>
+        <!-- 配置devtools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+        </dependency>
+        <!-- 配置springBoot的test启动器 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
 
         <!-- xls格式excel依赖包 -->
@@ -112,6 +127,27 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test-autoconfigure</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -120,7 +156,15 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>cn.edu.ccut.App</mainClass>
+                </configuration>
+            </plugin>
         </plugins>
+
     </build>
 
 </project>
