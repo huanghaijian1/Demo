@@ -37,28 +37,43 @@ package com.example.demo.controller;
 //import org.elasticsearch.common.xcontent.XContentFactory;
 
 
+import com.example.demo.config.HighlightResultMapper;
 import com.example.demo.dao.EsBlogRepository;
 import com.example.demo.domain.Person;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.QueryStringQueryBuilder;
+import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.search.MatchQuery;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.DefaultResultMapper;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.ResultsExtractor;
+import org.springframework.data.elasticsearch.core.SearchResultMapper;
+import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
+import org.springframework.data.elasticsearch.core.aggregation.impl.AggregatedPageImpl;
 import org.springframework.data.elasticsearch.core.query.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 @RestController
 @RequestMapping("/elasticsearch")
@@ -71,7 +86,7 @@ public class EsDemoController {
 //    private EsBlogRepository esBlogRepository;
 
     @GetMapping("/find")
-    public void tesFindDoc(){
+    public Object tesFindDoc(String query){
 //        elasticsearchRestTemplate.queryForObject()
         Person documentId = elasticsearchRestTemplate.queryForObject(GetQuery.getById("1005"),Person.class);
         System.out.println(documentId);
@@ -122,41 +137,106 @@ public class EsDemoController {
         //执行方法2的时候需要加上注解
         //@Autowired
         //private ElasticsearchTemplate elasticsearchTemplate;
-        PageRequest page = PageRequest.of(0, 10000);
+        PageRequest page = PageRequest.of(0, 20);
 //        FieldSortBuilder sort = SortBuilders.fieldSort("id").order(SortOrder.DESC);
-        QueryBuilder queryBuilder = QueryBuilders.boolQuery()
-               .must(QueryBuilders.prefixQuery("name.keyword", "11463"));
-//                .mustNot(QueryBuilders.termQuery("name", "张三"));
-//                .should(QueryBuilders.termQuery("age", "32"));
-//                .should(QueryBuilders.termQuery("email", "qq.com"));
+        QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(matchQuery("name",query));
+//                .must(matchQuery("name",query));
+//                .must(prefixQuery("name.keyword", "11463"));
+//                .must(rangeQuery("date").gte(time.getTime()));
+//                .must(fuzzyQuery("name","value"));
+//                .must(queryStringQuery("date"));
+//                .mustNot(termQuery("name", "张三"));
+//                .should(termQuery("age", "32"));
+//                .should(termQuery("email", "qq.com"));
+        HighlightBuilder.Field highlightField = new HighlightBuilder.Field("name")
+                .preTags("<span style='color: red'>")
+                .postTags("</span>");
+
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
                .withQuery(queryBuilder)
+                .withHighlightFields(highlightField)
 //               .withQuery(QueryBuilders.matchQuery("hobby","qq"))
                 .withTypes("_doc")
                 .withPageable(page)
                 .build();
         long time = System.currentTimeMillis();
-        System.out.println(time);
-        List<Person> result = elasticsearchRestTemplate.queryForList(searchQuery, Person.class);
-        System.out.println(result);
-        System.out.println(result.size());
+//        List<Person> result = elasticsearchRestTemplate.queryForList(searchQuery, Person.class);
+        AggregatedPage<Person> lawRegulationResultEs = elasticsearchRestTemplate.queryForPage(searchQuery, Person.class, new HighlightResultMapper());
+        List<Person> resultEsList = lawRegulationResultEs.getContent();
+
+        System.out.println(resultEsList);
+        System.out.println(resultEsList.size());
         long time2 = System.currentTimeMillis();
         System.out.println(time2-time);
 
+        return resultEsList;
 
+    }
+
+    // 高亮、分页、条件查询 从es查询
+
+    /**
+     * //                .must(matchQuery("name",query));
+     * //                .must(prefixQuery("name.keyword", "11463"));
+     * //                .must(rangeQuery("date").gte(time.getTime()));
+     * //                .must(fuzzyQuery("name","value"));
+     * //                .must(queryStringQuery("date"));
+     * //                .mustNot(termQuery("name", "张三"));
+     * //                .should(termQuery("age", "32"));
+     * //                .should(termQuery("email", "qq.com"));
+     * @param query
+     * @param relationSiteNames
+     * @return
+     */
+    @GetMapping("/find2")
+    public Object resultSearch(String query, String relationSiteNames) {
+        // （a or b） and c 条件查询
+        BoolQueryBuilder filterBuilder = QueryBuilders.boolQuery();
+
+        BoolQueryBuilder filterCaseBuilder = QueryBuilders.boolQuery();
+        filterCaseBuilder.should(QueryBuilders.matchQuery("name", query));
+//        filterCaseBuilder.should(QueryBuilders.termQuery("hobby", query));
+//        filterCaseBuilder.should(QueryBuilders.matchQuery("age", Integer.parseInt(query)));
+
+        BoolQueryBuilder filterPhoneBuilder = QueryBuilders.boolQuery();
+        if (StringUtils.isNotBlank(relationSiteNames)) {
+            // 模糊匹配
+            MatchPhraseQueryBuilder relationSiteNames1 = QueryBuilders.matchPhraseQuery("hobby", relationSiteNames);
+            filterPhoneBuilder.must(relationSiteNames1);
+        }
+        // （a or b） and c 条件查询
+        filterBuilder.must(filterCaseBuilder).must(filterPhoneBuilder);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder.must(filterBuilder);
+
+        // 高亮显示
+        HighlightBuilder.Field message = new HighlightBuilder.Field("name").preTags("<span style=\"color:red\">").postTags("</span>");
+        HighlightBuilder.Field message2 = new HighlightBuilder.Field("email").preTags("<span style=\"color:red\">").postTags("</span>");
+        // 分页查询
+        Pageable of = PageRequest.of(0, 10);
+        // 构建查询条件
+        NativeSearchQuery query2 = new NativeSearchQueryBuilder()
+                .withQuery(boolQueryBuilder)
+                .withPageable(of)
+                .withHighlightFields(message,message2)
+                .build();
+        // 分页查询
+        AggregatedPage<Person> lawRegulationResultEs = elasticsearchRestTemplate.queryForPage(query2, Person.class, new HighlightResultMapper());
+        List<Person> resultEsList = lawRegulationResultEs.getContent();
+        return resultEsList;
     }
 
     @GetMapping("/create")
     public void testCreateDoc(){
         List<IndexQuery> list = new ArrayList<>(10000);
-        for(int i=100;i<20000000;i++){
+        for(int i=100;i<10200;i++){
             Person person = new Person(i+"", i+"-"+UUID.randomUUID().toString(),23+(int)(1+Math.random()*10),i+"@qq.com","提"+i);
             IndexQuery indexQuery = new IndexQueryBuilder()
                     .withId(person.getId())
                     .withObject(person)
                     .build();
             list.add(indexQuery);
-            if(list.size()==10000){
+            if(list.size()==10000||i==10200){
                 elasticsearchRestTemplate.bulkIndex(list);
                 list = new ArrayList<>();
             }
@@ -173,6 +253,8 @@ public class EsDemoController {
     public void testUpdateDoc() throws Exception{
         Map<String, Object> jsonMap = new HashMap<>();
         jsonMap.put("name", "张三");
+        jsonMap.put("age",17);
+        jsonMap.put("hobby","写代码");
         UpdateRequest updateRequest = new UpdateRequest().doc(jsonMap);
         UpdateQuery query = new UpdateQueryBuilder()
                 .withClass(Person.class)
@@ -186,6 +268,10 @@ public class EsDemoController {
     @GetMapping("/delete")
     public void testDeleteDoc() throws Exception{
         String documentId = elasticsearchRestTemplate.delete(Person.class,"1005");
+        QueryBuilder builder = QueryBuilders.boolQuery().must(prefixQuery("name.keyword", "11463"));
+        DeleteQuery deleteQuery = new DeleteQuery();
+        deleteQuery.setQuery(builder);
+        elasticsearchRestTemplate.delete(deleteQuery);
         System.out.println(documentId);
     }
 
