@@ -2,8 +2,10 @@ package com.example.demo.complexImport;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.enums.CellExtraTypeEnum;
+import com.alibaba.excel.read.builder.ExcelReaderBuilder;
 import com.example.demo.complexImport.example1.BigDateExcelListener;
 import com.example.demo.complexImport.example2.EasyExcelUtil;
+import com.example.demo.complexImport.example3.DistModel;
 import com.example.demo.complexImport.example3.UploadDataListener;
 import com.example.demo.domain.response.InternalResponse;
 import com.example.demo.service.BasicService;
@@ -83,8 +85,9 @@ public class ImportController {
      * @throws IOException
      */
     @ApiOperation("2-测试easyExcel")
-    @PostMapping(value = "/importBasic")
-    public InternalResponse importBasic(@ApiParam("上传文件") MultipartFile file) throws IOException {
+    @GetMapping(value = "/importBasic")
+    public InternalResponse importBasic() throws IOException {
+//    public InternalResponse importBasic(@ApiParam("上传文件") MultipartFile file) throws IOException {
 //        BigDateExcelListener basicExcelListener=new BigDateExcelListener(basicService);
         UploadDataListener basicExcelListener = new UploadDataListener();
         InputStream input = new FileInputStream(new File("d://test22.xls"));
@@ -92,7 +95,7 @@ public class ImportController {
 //        EasyExcel.read(input, HashMap.class, basicExcelListener).headRowNumber(0).sheet().doRead();
 //        EasyExcel.read(input,com.example.demo.complexImport.example3.TestModel.class, basicExcelListener).extraRead(CellExtraTypeEnum.MERGE).sheet("表-09 综合单价分析表").headRowNumber(0).doReadSync();
         EasyExcel.read(input,com.example.demo.complexImport.example3.TestModel.class, basicExcelListener).sheet("表-09 综合单价分析表").headRowNumber(0).doReadSync();
-
+        List<DistModel> list = basicExcelListener.getData();
         input.close();
         Map<String,String> result = new HashMap<>();
         result.put("message","");

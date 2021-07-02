@@ -174,7 +174,6 @@ public class EsDemoController {
     }
 
     // 高亮、分页、条件查询 从es查询
-
     /**
      * //                .must(matchQuery("name",query));
      * //                .must(prefixQuery("name.keyword", "11463"));

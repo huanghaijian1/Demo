@@ -5,8 +5,10 @@ import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.excel.metadata.CellExtra;
 import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -21,9 +23,24 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
     /**
      * 解析的数据
      */
-    List<T> list = new ArrayList<>();
-    List<List<T>> list2 = new ArrayList<>();
-    boolean flag = true;
+    List<DistModel> list = new ArrayList<>();
+//    List<List<T>> list2 = new ArrayList<>();
+    DistModel distModel = new DistModel();
+    //定额列表
+    private List<Quota> quotaList = new ArrayList<>();
+    Quota quota = new Quota();
+    //定额解析标志
+    boolean quotaFlag = false;
+    //材料费明细
+    private List<MaterialCostDetails> materialCostDetailsList = new ArrayList<>();
+    MaterialCostDetails details = new MaterialCostDetails();
+    //材料费明细解析标志
+    boolean detailsFlag = false;
+
+    //跨页解析-定额列表
+    boolean pageQuotaFlag = false;
+    //跨页解析-材料费明细
+    boolean pagedetailsFlag = false;
 
     /**
      * 正文起始行
@@ -47,16 +64,137 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
     @Override
     public void invoke(T data, AnalysisContext context) {
 //        LOGGER.info("解析到一条数据:{}", JSON.toJSONString(data));
-        String json = JSON.toJSONString(data);
+//        String json = JSON.toJSONString(data);
 //        if(json.contains("工程名称")){
 //            flag = true;
 //
 //        }
-        list.add(data);
-        if(json.contains("注：1.如不使用省级或行业建设主管部门发布的计价依据，可不填定额编码、名称等；")){
-//            flag=false;
-            list2.add(list);
-            list = new ArrayList<>();
+//        list.add(data);
+//        if(json.contains("工程名称")){
+////            flag=false;
+//            list2.add(list);
+//            list = new ArrayList<>();
+//        }
+        TestModel t = (TestModel)data;
+        if("项目编码".equals(t.getA())){
+            if(StringUtils.isNotBlank(distModel.getProjectNum())){
+                list.add(distModel);
+                distModel = new DistModel();
+                quotaList = new ArrayList<>();
+                materialCostDetailsList = new ArrayList<>();
+                quotaFlag = false;
+                detailsFlag = false;
+            }else{
+                distModel.setProjectNum(t.getC());
+                distModel.setProjectName(t.getF());
+                distModel.setCountUnit(t.getK());
+                distModel.setWord(t.getN());
+            }
+        }
+
+
+        //小计
+        if("人工单价".equals(t.getA())){
+            distModel.setSubtotalLaborCost(t.getJ());
+            distModel.setSubtotalMaterialCost(t.getK());
+            distModel.setSubtotalMachineryCost(t.getM());
+            distModel.setSubtotalProfit(t.getN());
+            quotaFlag = false;
+
+        }
+
+
+        if("未计价材料费".equals(t.getC())){
+            //人工单价
+            distModel.setLaborPrice(t.getA());
+            //未计价材料费
+            distModel.setUnpricedMaterialCost(t.getJ());
+        }
+
+
+
+        if("其他材料费".equals(t.getB()) && StringUtils.isBlank(t.getG())){
+            distModel.setOtherUnitPrice(t.getJ());
+            distModel.setOtherTotalPrice(t.getK());
+            distModel.setOtherEstUnitPrice(t.getM());
+            distModel.setOtherEstTotalPrice(t.getN());
+            detailsFlag = false;
+        }
+
+
+        //一般 材料费小计 为一个清单的结束
+        if("材料费小计".equals(t.getB())){
+            distModel.setTotalUnitPrice(t.getJ());
+            distModel.setTotalTotalPrice(t.getK());
+            distModel.setTotalEstUnitPrice(t.getM());
+            distModel.setTotalEstTotalPrice(t.getN());
+            list.add(distModel);
+            distModel = new DistModel();
+            quotaList = new ArrayList<>();
+            materialCostDetailsList = new ArrayList<>();
+        }
+
+        if("注：1.如不使用省级或行业建设主管部门发布的计价依据，可不填定额编码、名称等；".equals(t.getA())){
+            if(quotaFlag){
+                quotaFlag = false;
+                pageQuotaFlag = true;
+            }
+            if(detailsFlag){
+                detailsFlag = false;
+                pagedetailsFlag = true;
+            }
+            //不是跨页解析
+            if(!(pageQuotaFlag || pagedetailsFlag)){
+                if(StringUtils.isNotBlank(distModel.getProjectNum())){//特殊情况，此时也为一个清单的结束
+                    list.add(distModel);
+                    distModel = new DistModel();
+                    quotaList = new ArrayList<>();
+                    materialCostDetailsList = new ArrayList<>();
+                }
+            }
+        }
+        if((pageQuotaFlag||pagedetailsFlag) && (StringUtils.isNotBlank(t.getA()) && t.getA().contains("工程名称"))){//每页开始
+            if(pageQuotaFlag){//是否为跨页解析定额
+                quotaFlag = true;
+            }
+            if(pagedetailsFlag){//是否为跨页解析材料费明细
+                detailsFlag = true;
+            }
+        }
+        //材料费明细
+        if(detailsFlag){
+            details.setInformation(t.getB());
+            details.setUnit(t.getG());
+            details.setCount(t.getI());
+            details.setUnitPrice(t.getJ());
+            details.setTotalPrice(t.getK());
+            details.setEstUnitPrice(t.getM());
+            details.setEstTotalPrice(t.getN());
+            materialCostDetailsList.add(details);
+        }
+        if("主要材料名称、规格、型号".equals(t.getB())){
+            detailsFlag = true;
+        }
+
+        //清单综合单价组成明细 定额部分解析
+        if(quotaFlag){
+            quota.setQuotaNum(t.getA());
+            quota.setQuotaName(t.getB());
+            quota.setQuotaUnit(t.getC());
+            quota.setQuotaCount(t.getD());
+            quota.setLaborCost(t.getE());
+            quota.setMaterialCost(t.getF());
+            quota.setMachineryCost(t.getG());
+            quota.setProfit(t.getI());
+            quota.setTotalLaborCost(t.getJ());
+            quota.setTotalMaterialCost(t.getK());
+            quota.setTotalMachineryCost(t.getM());
+            quota.setTotalProfit(t.getN());
+            quotaList.add(quota);
+        }
+        if("人工费".equals(t.getE())){
+            //清单综合单价组成明细 下一行
+            quotaFlag = true;
         }
 
 
@@ -70,7 +208,7 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
     @Override
     public void doAfterAllAnalysed(AnalysisContext context) {
         System.out.println("--------------------------------------------------------------------------------------------------");
-        for(List t : list2){
+        for(DistModel t : list){
             System.out.println(t);
         }
         System.out.println("--------------------------------------------------------------------------------------------------");
@@ -86,7 +224,7 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
     /**
      * 加上存储数据库
      */
-    public List<T> getData() {
+    public List<DistModel> getData() {
         return list;
     }
 
