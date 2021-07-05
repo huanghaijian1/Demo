@@ -20,9 +20,10 @@ public class DistModel {
     //工程量
     private String word;
 
+
     /**解析第二部分*/
     // 清单综合单价组成明细 定额
-    private List<Quota> quotaList;
+    private List<Quota> quotaList = new ArrayList<>();
 
     //小计-人工费
     private String subtotalLaborCost;
@@ -48,7 +49,7 @@ public class DistModel {
 
    /**解析第三部分*/
     //材料费明细
-    private List<MaterialCostDetails> materialCostDetailsList;
+    private List<MaterialCostDetails> materialCostDetailsList = new ArrayList<>();
 
     //其他材料费
     //单价（元）
