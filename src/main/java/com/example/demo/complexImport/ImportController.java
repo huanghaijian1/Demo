@@ -92,15 +92,13 @@ public class ImportController {
         UploadDataListener basicExcelListener = new UploadDataListener();
         InputStream input = new FileInputStream(new File("d://test22.xls"));
 //        EasyExcel.read(file.getInputStream(), TestModel.class, basicExcelListener).headRowNumber(1).sheet().doRead();
-//        EasyExcel.read(input, HashMap.class, basicExcelListener).headRowNumber(0).sheet().doRead();
-//        EasyExcel.read(input,com.example.demo.complexImport.example3.TestModel.class, basicExcelListener).extraRead(CellExtraTypeEnum.MERGE).sheet("表-09 综合单价分析表").headRowNumber(0).doReadSync();
         EasyExcel.read(input,com.example.demo.complexImport.example3.TestModel.class, basicExcelListener).sheet("表-09 综合单价分析表").headRowNumber(0).doReadSync();
         List<DistModel> list = basicExcelListener.getData();
         input.close();
-        Map<String,String> result = new HashMap<>();
-        result.put("message","");
+        Map<String,Object> result = new HashMap<>();
+        result.put("message","导入成功");
         result.put("code","200");
-        result.put("data","导入成功");
+        result.put("data",list);
 
         return InternalResponse.success().withBody(result);
 

@@ -69,7 +69,7 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
 
             }
             distModel.setProjectNum(t.getC());
-            distModel.setProjectName(t.getF());
+            distModel.setProjectName(t.getG());
             distModel.setCountUnit(t.getK());
             distModel.setWord(t.getN());
         }
@@ -97,8 +97,6 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
         if("清单项目综合单价".equals(t.getA())){
             distModel.setAllInUnitRate(t.getJ());
         }
-
-
 
         if("其他材料费".equals(t.getB()) && StringUtils.isBlank(t.getG())){
             distModel.setOtherUnitPrice(t.getJ());
@@ -163,7 +161,7 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
             quota.setProfit(t.getI());
             quota.setTotalLaborCost(t.getJ());
             quota.setTotalMaterialCost(t.getK());
-            quota.setTotalMachineryCost(t.getM());
+            quota.setTotalMachineryCost(t.getL());
             quota.setTotalProfit(t.getN());
             distModel.getQuotaList().add(quota);
         }
@@ -176,7 +174,7 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
             details.setCount(t.getH());
             details.setUnitPrice(t.getJ());
             details.setTotalPrice(t.getK());
-            details.setEstUnitPrice(t.getM());
+            details.setEstUnitPrice(t.getL());
             details.setEstTotalPrice(t.getN());
             distModel.getMaterialCostDetailsList().add(details);
         }
