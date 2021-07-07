@@ -1,4 +1,4 @@
-package com.example.demo.complexImport.example3;
+package com.example.demo.complexImport.example3.analysisEntity;
 
 import lombok.Data;
 

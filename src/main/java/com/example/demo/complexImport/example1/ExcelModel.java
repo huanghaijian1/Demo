@@ -1,4 +1,4 @@
-package com.example.demo.complexImport;
+package com.example.demo.complexImport.example1;
 
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -12,7 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Data
-public class TestModel extends BaseRowModel{
+public class ExcelModel extends BaseRowModel{
 
 //    @ExcelProperty(value = "姓名", index = 0)
 //    private String xm;

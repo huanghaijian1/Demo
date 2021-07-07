@@ -2,20 +2,16 @@ package com.example.demo.complexImport;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.enums.CellExtraTypeEnum;
-import com.alibaba.excel.read.builder.ExcelReaderBuilder;
-import com.example.demo.complexImport.example1.BigDateExcelListener;
-import com.example.demo.complexImport.example2.EasyExcelUtil;
-import com.example.demo.complexImport.example3.DistModel;
+
 import com.example.demo.complexImport.example3.UploadDataListener;
+import com.example.demo.complexImport.example3.analysisEntity.DistModel;
+import com.example.demo.complexImport.example3.util.Commonstrings;
+import com.example.demo.complexImport.example3.util.ExcelModel;
 import com.example.demo.domain.response.InternalResponse;
 import com.example.demo.service.BasicService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -34,53 +30,10 @@ public class ImportController {
     }
 
 
-    //导入excel
-    @ApiOperation("1-测试easyExcel")
-    @PostMapping(value = "excelImport")
-    public String excelImport(HttpServletRequest request,@ApiParam("1-上传文件")MultipartFile[] files) throws Exception {
-        File file2 = new File("d://test2.xls");
-
-        Map<String, Object> result = EasyExcelUtil.readExcel(file2, new TestModel(), 1);
-        Boolean flag = (Boolean) result.get("flag");
-        if (flag) {
-            List<Object> list = (List<Object>) result.get("datas");
-            if (list != null && list.size() > 0) {
-                for (Object o : list) {
-                    TestModel xfxx = (TestModel) o;
-                    System.out.println(xfxx.getXm() + "/" + xfxx.getSjh() + "/" + xfxx.getSjh());
-                }
-            }
-        } else {
-            System.out.println("表头格式错误");
-        }
-
-        if (files != null && files.length > 0) {
-            MultipartFile file = files[0];
-
-//            File file2 = new File("d://test2.xls");
-//
-//            Map<String, Object> result = EasyExcelUtil.readExcel(file2, new TestModel(), 1);
-//            Boolean flag = (Boolean) result.get("flag");
-//            if (flag) {
-//                List<Object> list = (List<Object>) result.get("datas");
-//                if (list != null && list.size() > 0) {
-//                    for (Object o : list) {
-//                        TestModel xfxx = (TestModel) o;
-//                        System.out.println(xfxx.getXm() + "/" + xfxx.getSjh() + "/" + xfxx.getSjh());
-//                    }
-//                }
-//            } else {
-//                System.out.println("表头格式错误");
-//            }
-        }
-        return "index";
-
-    }
-
 
     /**
      * 导入数据量很大时，分批保存到数据库
-     * @param file
+     * @param
      * @return
      * @throws IOException
      */
@@ -88,17 +41,26 @@ public class ImportController {
     @GetMapping(value = "/importBasic")
     public InternalResponse importBasic() throws IOException {
 //    public InternalResponse importBasic(@ApiParam("上传文件") MultipartFile file) throws IOException {
-//        BigDateExcelListener basicExcelListener=new BigDateExcelListener(basicService);
-        UploadDataListener basicExcelListener = new UploadDataListener();
+
+        UploadDataListener basicExcelListener = new UploadDataListener(0);
         InputStream input = new FileInputStream(new File("d://test22.xls"));
-//        EasyExcel.read(file.getInputStream(), TestModel.class, basicExcelListener).headRowNumber(1).sheet().doRead();
-        EasyExcel.read(input,com.example.demo.complexImport.example3.TestModel.class, basicExcelListener).sheet("表-09 综合单价分析表").headRowNumber(0).doReadSync();
-        List<DistModel> list = basicExcelListener.getData();
-        input.close();
+
+//        EasyExcel.read(file.getInputStream(), ExcelModel.class, basicExcelListener).headRowNumber(0).sheet().doRead();
+//        List<ExcelModel> list = EasyExcel.read(input,ExcelModel.class, basicExcelListener).extraRead(CellExtraTypeEnum.MERGE).sheet("表-09 综合单价分析表").headRowNumber(0).doReadSync();
+//        List<DistModel> resultList = basicExcelListener.analysisData(list);
+//        for(DistModel dist : resultList){
+//            System.out.println(dist);
+//        }
+        EasyExcel.read(input, ExcelModel.class, basicExcelListener).extraRead(CellExtraTypeEnum.MERGE).headRowNumber(0).doReadAll();
+        //综合单价分析表-解析数据
+        List<DistModel> analyisData = basicExcelListener.analysisData();
+        //单位工程招标控制价汇总表-解析数据
+
+
         Map<String,Object> result = new HashMap<>();
         result.put("message","导入成功");
         result.put("code","200");
-        result.put("data",list);
+        result.put("data","");
 
         return InternalResponse.success().withBody(result);
 

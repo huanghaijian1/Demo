@@ -1,4 +1,4 @@
-package com.example.demo.complexImport.example3;
+package com.example.demo.complexImport.example3.analysisEntity;
 
 import lombok.Data;
 
@@ -8,11 +8,17 @@ import java.util.List;
 @Data
 public class DistModel {
     /**解析第一部分*/
+    //序号 特殊格式的字段
+    private String orderNum;
+
     //项目编码
     private String projectNum;
 
     //项目名称
     private String projectName;
+
+    //项目特征 特殊格式的字段
+    private String features;
 
     //计量单位
     private String countUnit;
@@ -24,6 +30,18 @@ public class DistModel {
     /**解析第二部分*/
     // 清单综合单价组成明细 定额
     private List<Quota> quotaList = new ArrayList<>();
+
+    //合价-人工费 特殊格式的字段
+    private String totalLaborCost;
+
+    //合价-材料费 特殊格式的字段
+    private String totalMaterialCost;
+
+    //合价-机具费 特殊格式的字段
+    private String totalMachineryCost;
+
+    //合价-管理和利润 特殊格式的字段
+    private String totalProfit;
 
     //小计-人工费
     private String subtotalLaborCost;
