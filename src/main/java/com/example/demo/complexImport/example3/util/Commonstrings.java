@@ -2,24 +2,103 @@ package com.example.demo.complexImport.example3.util;
 
 public class Commonstrings {
 
-
-
-    //sheet页相关标志
-    public final static String sheetMapKey_zhdjfxb = "综合单价分析表";
-    public final static String zhdjfxbbz[] = {"综合单价分析表","项目编码","项目名称","计量单位"};
-
-    public final static String sheetMapKey_zbkzjhzb = "单位工程招标控制价汇总表";
-    public final static String zbkzjhzbbz[] = {"序号","汇总内容","金额","备注"};
-
-    public final static String sheetMapKey_qdyjjb = "分部分项工程和单价措施项目清单与计价表";
-    public final static String qdyjjbbz[] = {"序号","项目编码","项目名称","计量单位","项目特征","工程量"};
-
-    public final static String sheetMapKey_rcjhzb = "单位工程人材机汇总表";
-    public final static String rcjhzbbz[] = {"汇总","序号","名称及规格","单位","数量","市场价","合计"};
+    /**
+     * 校验导入文件时的错误信息提示文本
+     */
+    public final static String error_xmbm = "项目编码有误";
+    public final static String error_xmzdz = "项目名称为空";
+    public final static String error_xmtzms = "项目特征描述为空";
+    public final static String error_jldw = "计量单位为空";
+    public final static String error_gcl = "工程量不为数字或空值";
+    public final static String error_zhdj = "综合单价不为数字或空值";
+    public final static String error_hj = "合计不为数字或空值";
+    public final static String error_clmc = "材料名称为空";
+    public final static String error_dw = "材料单位为空";
+    public final static String error_sl = "材料数量不为数字或空值";
+    public final static String error_scj = "材料单价/市场价不为数字或空值";
+    public final static String error_xmbmbdy = "综合单价分析表里的项目编码在分部分项工程和单价措施项目清单与计价表里找不到";
+    public final static String error_dexx = "综合单价分析表信息有误";
 
     /**
-     * 综合单价分析表 重要标志
+     * 分部分项工程和单价措施项目清单与计价表
      */
+    //sheet页相关标志
+    public final static String sheetMapKey_qdyjjb = "分部分项工程和单价措施项目清单与计价表";
+    public final static String qdyjjbbz[] = {"序号","项目编码","项目名称","计量单位","项目特征","工程量"};
+    //重要标志
+    //    public final static String xh = "序号";
+    public final static String zgj = "暂估价";
+    public final static String kyjx_qdyjjb = "为计取规费等的使用"; //为计取规费等的使用，可在表中增设其中：“定额人工费”
+    //表头
+    public final static String xhbt_qdyjjb[] = {"序号"};
+    public final static String xmbm_qdyjjb[] = {"项目编码"};
+    public final static String xmmc_qdyjjb[] = {"项目名称"};
+    public final static String jldw_qdyjjb[] = {"计量单位"};
+    public final static String xmtz_qdyjjb[] = {"项目特征","项目特征描述"};
+    public final static String gcl_qdyjjb[] = {"工程量"};
+    public final static String zhdj_qdyjjb[] = {"综合单价"};
+    public final static String hj_qdyjjb[] = {"合价"};
+    public final static String zgj_qdyjjb[] = {"暂估价"};
+
+
+    /**
+     * 单位工程人材机汇总表
+     */
+    //sheet页相关标志
+    public final static String sheetMapKey_rcjhzb1 = "单位工程人材机汇总表";
+    //单位工程人材机汇总表 /主要材料设备价格表/主要材料价格表/发包人提供材料和工程设备一览表/承包人提供主要材料和工程设备一览表
+    public final static String rcjhzbbz1[] = {"单位工程人材机汇总表 ","主要材料设备价格表","主要材料价格表","发包人提供材料和工程设备一览表","承包人提供主要材料和工程设备一览表"};
+    public final static String rcjhzbbz2[] = {"序号","名称及规格","单位","数量","市场价","合计"};
+    public final static String rcjhzbbz3[] = {"材料名称","规格","型号","特殊要求","单位","数量","单价"};
+    //重要标志
+//    public final static String xh = "序号";
+    public final static String bzr = "编制人";
+    //表头一
+    public final static String xhbt_rcjhzb[] = {"序号"};
+    public final static String mcjkg_rcjhzb[] = {"名称及规格"};
+    public final static String dw_rcjhzb[] = {"单位"};
+    public final static String sl_rcjhzb[] = {"数量"};
+    public final static String scj_rcjhzb[] = {"市场价","单价"};
+    public final static String hj_rcjhzb[] = {"合计","市场价合计"};
+    //sheet页相关标志
+    public final static String sheetMapKey_rcjhzb2 = "主要材料设备价格表";
+    //表头二
+//    public final static String xhbt_rcjhzb[] = {"序号"};
+//    public final static String dw_rcjhzb[] = {"单位"};
+//    public final static String sl_rcjhzb[] = {"数量"};
+//    public final static String scj_rcjhzb[] = {"市场价","单价"};
+    public final static String clmc_rcjhzb[] = {"材料名称"};
+    public final static String kgxhd_rcjhzb[] = {"规格、型号等特殊要求","规格","型号","特殊要求"};
+
+
+
+    /**
+     * 单位工程招标控制价汇总表表头
+     */
+    //sheet页相关标志
+    public final static String sheetMapKey_zbkzjhzb = "单位工程招标控制价汇总表";
+    public final static String zbkzjhzbbz[] = {"序号","汇总内容","金额","备注"};
+    //重要标志
+//    public final static String xh = "序号";
+    public final static String kyjx_zbkzjhzb = "本表适用于单位工程招标控制价或投标报价的汇总";
+    //分部分项合计/分部分项、措施合计、其他项目、规费、税金、总造价
+    public final static String[] keywordArr_zbkzjhzb = {"分部分项合计","分部分项","措施合计","其他项目","规费","税金","总造价"};
+
+    //表头
+    public final static String xhbt[] = {"序号"};
+    public final static String hznrbt[] = {"汇总内容"};
+    public final static String jebt[] = {"金额(元)","金额（元）"};
+    public final static String bzbt[] = {"备注"};
+
+
+    /**
+     * 综合单价分析表
+     */
+    //sheet页相关标志
+    public final static String sheetMapKey_zhdjfxb = "综合单价分析表";
+    public final static String zhdjfxbbz[] = {"综合单价分析表","项目编码","项目名称","人工费","材料费"};
+
+    //重要标志
     public final static String gcmc = "工程名称";
     public final static String xh = "序号";
     public final static String xmbm = "项目编码";
@@ -33,9 +112,6 @@ public class Commonstrings {
     public final static String clfxj = "材料费小计";
     public final static String kyjx = "如不使用省级或行业建设主管部门发布的计价依据";
 
-    /**
-     * 综合单价分析表 表头
-     */
     //项目编码等横表头
     public final static String xmbmbt[] = {"项目编码"};
     public final static String xmmcbt[] = {"项目名称"};

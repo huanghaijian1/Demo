@@ -5,6 +5,9 @@ import com.alibaba.excel.enums.CellExtraTypeEnum;
 
 import com.example.demo.complexImport.example3.UploadDataListener;
 import com.example.demo.complexImport.example3.analysisEntity.DistModel;
+import com.example.demo.complexImport.example3.analysisEntity.PriceList;
+import com.example.demo.complexImport.example3.analysisEntity.TalentAndMachine;
+import com.example.demo.complexImport.example3.analysisEntity.TenderControlPrice;
 import com.example.demo.complexImport.example3.util.Commonstrings;
 import com.example.demo.complexImport.example3.util.ExcelModel;
 import com.example.demo.domain.response.InternalResponse;
@@ -45,22 +48,14 @@ public class ImportController {
         UploadDataListener basicExcelListener = new UploadDataListener(0);
         InputStream input = new FileInputStream(new File("d://test22.xls"));
 
-//        EasyExcel.read(file.getInputStream(), ExcelModel.class, basicExcelListener).headRowNumber(0).sheet().doRead();
-//        List<ExcelModel> list = EasyExcel.read(input,ExcelModel.class, basicExcelListener).extraRead(CellExtraTypeEnum.MERGE).sheet("表-09 综合单价分析表").headRowNumber(0).doReadSync();
-//        List<DistModel> resultList = basicExcelListener.analysisData(list);
-//        for(DistModel dist : resultList){
-//            System.out.println(dist);
-//        }
-        EasyExcel.read(input, ExcelModel.class, basicExcelListener).extraRead(CellExtraTypeEnum.MERGE).headRowNumber(0).doReadAll();
-        //综合单价分析表-解析数据
-        List<DistModel> analyisData = basicExcelListener.analysisData();
-        //单位工程招标控制价汇总表-解析数据
+        EasyExcel.read(input, ExcelModel.class, basicExcelListener).extraRead(CellExtraTypeEnum.MERGE).ignoreEmptyRow(true).headRowNumber(0).doReadAll();
+        Map<String,Object> map = basicExcelListener.allAnalysisAndVerification();
 
 
         Map<String,Object> result = new HashMap<>();
         result.put("message","导入成功");
         result.put("code","200");
-        result.put("data","");
+        result.put("data",map);
 
         return InternalResponse.success().withBody(result);
 

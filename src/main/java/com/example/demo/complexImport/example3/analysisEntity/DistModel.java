@@ -5,6 +5,10 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 综合单价分析表
+ */
+
 @Data
 public class DistModel {
     /**解析第一部分*/
@@ -94,6 +98,9 @@ public class DistModel {
 
     //暂估合价（元）
     private String totalEstTotalPrice;
+
+    //错误信息
+    private List<ErrorRecord> errorRecordList;
 
 
 

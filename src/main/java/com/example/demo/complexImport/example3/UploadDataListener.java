@@ -5,19 +5,15 @@ import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.excel.metadata.CellExtra;
 import com.alibaba.fastjson.JSON;
-import com.example.demo.complexImport.example3.analysisEntity.DistModel;
-import com.example.demo.complexImport.example3.analysisEntity.MaterialCostDetails;
-import com.example.demo.complexImport.example3.analysisEntity.Quota;
+import com.example.demo.complexImport.example3.analysisEntity.*;
 import com.example.demo.complexImport.example3.util.Commonstrings;
+import com.example.demo.complexImport.example3.util.ImportCheckUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.example.demo.complexImport.example3.util.ExcelModel;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.alibaba.excel.enums.CellExtraTypeEnum.MERGE;
 
@@ -28,8 +24,9 @@ import static com.alibaba.excel.enums.CellExtraTypeEnum.MERGE;
 public class UploadDataListener<T> extends AnalysisEventListener<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(UploadDataListener.class);
     /**
-     * 解析的数据
+     * 综合单价分析表
      */
+    //解析的数据
     List<DistModel> list = new ArrayList<>();
 
     DistModel distModel = new DistModel();
@@ -61,6 +58,7 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
     //特殊模板表头
     Map<String,String> headerMap4 = null;
 
+
     /**
      * 正文起始行
      */
@@ -89,6 +87,25 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
 
     public UploadDataListener(Integer headRowNumber) {
         this.headRowNumber = headRowNumber;
+    }
+
+
+    /**
+     * 所有解析与校验
+     * @return
+     */
+    public Map<String,Object> allAnalysisAndVerification(){
+        List<Object> objectList = tenderControlPrice();//已完成校验
+        List<PriceList> priceListList = priceList();//已完成校验
+        List<DistModel> distModelList = analysisData();
+        ImportCheckUtil.checkCunitPrice(distModelList,priceListList);//综合单价分析表校验
+        List<TalentAndMachine> talentAndMachineList = talentAndMachine();//已完成校验
+        Map<String,Object> resultMap = new HashMap<>();
+        resultMap.put(Commonstrings.sheetMapKey_zbkzjhzb,objectList);
+        resultMap.put(Commonstrings.sheetMapKey_qdyjjb,priceListList);
+        resultMap.put(Commonstrings.sheetMapKey_zhdjfxb,distModelList);
+        resultMap.put(Commonstrings.sheetMapKey_rcjhzb1,talentAndMachineList);
+        return resultMap;
     }
 
     /**
@@ -125,6 +142,7 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
         if(currSheetList != null && currSheetList.size()>0){
             //读取前十行数据 用作判断当前sheet页是哪个sheet页
             String nr = JSON.toJSONString(currSheetList.subList(0,currSheetList.size()<10?currSheetList.size():10));
+            nr = nr==null?"":nr.replace("\n", "").replace("\r", "").replace("\\s*", "");
             String type = judgeSheet(nr);
             if(StringUtils.isNotBlank(type)){
                 allSheetMap.put(type,currSheetList);//把每个sheet页的数据加进来
@@ -176,27 +194,213 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
         }
         //单位工程人材机汇总表
         int count4 = 0;
-        int sum4 = Commonstrings.rcjhzbbz.length;
+        int count5 = 0;
+        int count6 = 0;
+        //标题鉴定
+        int sum4 = Commonstrings.rcjhzbbz1.length;
         for(int x=0;x<sum4;x++){
-            if(nr.contains(Commonstrings.rcjhzbbz[x])){
+            if(nr.contains(Commonstrings.rcjhzbbz1[x])){
                 count4++;
+                x = sum4;
             }
         }
-        if(count4 == sum4){
-            return Commonstrings.sheetMapKey_rcjhzb;
+        //表头鉴定1
+        int sum5 = Commonstrings.rcjhzbbz2.length;
+        for(int x=0;x<sum5;x++){
+            if(nr.contains(Commonstrings.rcjhzbbz2[x])){
+                count5++;
+            }
         }
+        if(count4 == 1 && sum5 == count5){
+            return Commonstrings.sheetMapKey_rcjhzb1;
+        }
+        //表头鉴定2
+        int sum6 = Commonstrings.rcjhzbbz3.length;
+        for(int x=0;x<sum6;x++){
+            if(nr.contains(Commonstrings.rcjhzbbz3[x])){
+                count6++;
+            }
+        }
+        if(count4 == 1 && sum6 == count6){
+            return Commonstrings.sheetMapKey_rcjhzb2;
+        }
+
         return null;
     }
 
-    //Summary table  汇总表
+    /**
+     * 单位工程招标控制价汇总表 解析及校验数据
+     * @return 返回值List<Object>
+     *  List<TenderControlPrice>第一个元素为读取到的必要数据  errorFlag=true时，金额字段有误
+     *  List<String>第二个元素缺失的必要数据
+     */
+    private List<Object> tenderControlPrice(){
+        List<ExcelModel> modelList = allSheetMap.get(Commonstrings.sheetMapKey_zbkzjhzb);
+        List<CellExtra> cellExtraList = extraMergeInfoMap.get(Commonstrings.sheetMapKey_zbkzjhzb);
+        List<ExcelModel> data = explainMergeData(modelList, cellExtraList, headRowNumber);
+        //存放数据集合
+        List<TenderControlPrice> result = new ArrayList<>();
+        //正文内容标志
+        boolean textFlag = false;
+        //表头
+        Map<String,String> headerMap5 = null;
+        List<String> recordList = new ArrayList<>();//记录已获取到的必要数据
+        for(ExcelModel t : data){
+            String json = t.toString();
+            if(json.contains(Commonstrings.kyjx_zbkzjhzb)){//本行数据置为非正文
+                textFlag = false;
+            }
+            //本行数据
+            if(textFlag){//为正文数据
+                TenderControlPrice tp = new TenderControlPrice();
+                String hznr = t.setTableData(headerMap5,t,Commonstrings.hznrbt);
+                boolean flag = ImportCheckUtil.filterData(hznr,Commonstrings.keywordArr_zbkzjhzb,recordList);
+                if(flag){//只获取指定数据
+                    tp.setXh(t.setTableData(headerMap5,t,Commonstrings.xhbt));
+                    tp.setHznr(hznr);
+                    String je = t.setTableData(headerMap5,t,Commonstrings.jebt);
+                    if(!ImportCheckUtil.checkNumber(je)){
+                        tp.setErrorFlag(true);
+                    }
+                    tp.setJe(t.setTableData(headerMap5,t,Commonstrings.jebt));
+                    tp.setBz(t.setTableData(headerMap5,t,Commonstrings.bzbt));
+                    result.add(tp);
+                }
 
-    //Price list 计价表
+            }
+
+            if(json.contains(Commonstrings.xh)){//下一行数据置为正文
+                textFlag = true;
+                if(headerMap5 == null){
+                    headerMap5 = new HashMap<>();
+                    t.setHeaderMap(null,t,headerMap5);
+                }
+            }
+
+        }
+        //是否汇总内容为 "分部分项合计"/"分部分项","措施合计","其他项目","规费","税金","总造价"的数据都有
+        List<String> defectList = Arrays.asList(Commonstrings.keywordArr_zbkzjhzb);
+        defectList.removeAll(recordList);//缺失汇总数据集合
+        List<Object> resultList = new ArrayList<>();
+        resultList.add(result);//读取到的必要数据  errorFlag=true时，金额字段有误
+        resultList.add(defectList);//缺失的必要数据
+        return resultList;
+    }
+
+    /**
+     * 分部分项工程和单价措施项目清单与计价表 解析及校验数据
+     * @return
+     */
+    private List<PriceList> priceList(){
+        List<ExcelModel> modelList = allSheetMap.get(Commonstrings.sheetMapKey_qdyjjb);
+        List<CellExtra> cellExtraList = extraMergeInfoMap.get(Commonstrings.sheetMapKey_qdyjjb);
+        List<ExcelModel> data = explainMergeData(modelList, cellExtraList, headRowNumber);
+        //存放数据集合
+        List<PriceList> result = new ArrayList<>();
+        //正文内容标志
+        boolean textFlag = false;
+        //表头
+        Map<String,String> headerMap = null;
+        for(ExcelModel t : data){
+            String json = t.toString();
+            if(json.contains(Commonstrings.kyjx_qdyjjb)){//本行数据置为非正文
+                textFlag = false;
+            }
+            //本行数据
+            if(textFlag){//为正文数据
+                String xmbm = t.setTableData(headerMap,t,Commonstrings.xmbm_qdyjjb);
+                if(ImportCheckUtil.checkProjectNum(xmbm)){
+                    PriceList pl = new PriceList();
+                    pl.setXh(t.setTableData(headerMap,t,Commonstrings.xhbt_qdyjjb));
+                    pl.setXmbm(xmbm);
+                    pl.setXmmc(t.setTableData(headerMap,t,Commonstrings.xmmc_qdyjjb));
+                    pl.setXmtzms(t.setTableData(headerMap,t,Commonstrings.xmtz_qdyjjb));
+                    pl.setJldw(t.setTableData(headerMap,t,Commonstrings.jldw_qdyjjb));
+                    pl.setGcl(t.setTableData(headerMap,t,Commonstrings.gcl_qdyjjb));
+                    pl.setZhdj(t.setTableData(headerMap,t,Commonstrings.zhdj_qdyjjb));
+                    pl.setHj(t.setTableData(headerMap,t,Commonstrings.hj_qdyjjb));
+                    pl.setZgj(t.setTableData(headerMap,t,Commonstrings.zgj_qdyjjb));
+                    ImportCheckUtil.checkpriceList(pl);//数据校验
+                    result.add(pl);
+                }
+
+            }
+
+            if(json.contains(Commonstrings.zgj)){//下一行数据置为正文
+                textFlag = true;
+                if(headerMap == null){
+                    headerMap = new HashMap<>();
+                    t.setHeaderMap(null,t,headerMap);
+                }
+            }
+
+        }
+        return result;
+    }
+
+    /**
+     * 单位工程人材机汇总表
+     * @return
+     */
+    private List<TalentAndMachine> talentAndMachine(){
+        List<ExcelModel> modelList;
+        List<CellExtra> cellExtraList;
+        boolean tableType = true;//是否为第一种表头格式
+        if(allSheetMap.containsKey(Commonstrings.sheetMapKey_rcjhzb1)){
+            modelList = allSheetMap.get(Commonstrings.sheetMapKey_rcjhzb1);
+            cellExtraList = extraMergeInfoMap.get(Commonstrings.sheetMapKey_rcjhzb1);
+        }else{
+            tableType = false;
+            modelList = allSheetMap.get(Commonstrings.sheetMapKey_rcjhzb2);
+            cellExtraList = extraMergeInfoMap.get(Commonstrings.sheetMapKey_rcjhzb2);
+        }
+        List<ExcelModel> data = explainMergeData(modelList, cellExtraList, headRowNumber);
+        //存放数据集合
+        List<TalentAndMachine> result = new ArrayList<>();
+        //正文内容标志
+        boolean textFlag = false;
+        //表头
+        Map<String,String> headerMap = null;
+        for(ExcelModel t : data){
+            String json = t.toString();
+            if(json.contains(Commonstrings.bzr)){//本行数据置为非正文
+                textFlag = false;
+            }
+            //本行数据
+            if(textFlag){//为正文数据
+                TalentAndMachine pam = new TalentAndMachine();
+                pam.setXh(t.setTableData(headerMap,t,Commonstrings.xhbt_rcjhzb));
+                if(tableType){
+                    pam.setMc(t.setTableData(headerMap,t,Commonstrings.mcjkg_rcjhzb));
+                    pam.setHj(t.setTableData(headerMap,t,Commonstrings.hj_rcjhzb));
+                }else{
+                    pam.setMc(t.setTableData(headerMap,t,Commonstrings.clmc_rcjhzb));
+                    pam.setGe(t.setTableData(headerMap,t,Commonstrings.kgxhd_rcjhzb));
+                }
+                pam.setDw(t.setTableData(headerMap,t,Commonstrings.dw_rcjhzb));
+                pam.setSl(t.setTableData(headerMap,t,Commonstrings.sl_rcjhzb));
+                pam.setScj(t.setTableData(headerMap,t,Commonstrings.scj_rcjhzb));
+                //数据校验
+                ImportCheckUtil.checkTalentAndMachine(pam);
+                result.add(pam);
+            }
+            if(json.contains(Commonstrings.xh)){//下一行数据置为正文
+                textFlag = true;
+                if(headerMap == null){
+                    headerMap = new HashMap<>();
+                    t.setHeaderMap(null,t,headerMap);
+                }
+            }
+
+        }
+        return result;
+    }
 
     /**
      * 综合单价分析表-解析数据
      * @return
      */
-    public List<DistModel> analysisData(){
+    private List<DistModel> analysisData(){
         List<ExcelModel> modelList = allSheetMap.get(Commonstrings.sheetMapKey_zhdjfxb);
         List<CellExtra> cellExtraList = extraMergeInfoMap.get(Commonstrings.sheetMapKey_zhdjfxb);
         List<ExcelModel> data = explainMergeData(modelList, cellExtraList, headRowNumber);
@@ -218,7 +422,7 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
      * 特殊格式
      * @param t
      */
-    public void specialTemplate(ExcelModel t){
+    private void specialTemplate(ExcelModel t){
 
         if(Commonstrings.kyjx.equals(t.getA())){//识别到这里是不为正文内容
             specialTextFlag = false;
@@ -252,7 +456,7 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
      * 一般格式
      * @param t
      */
-    public void template1(ExcelModel t){
+    private void template1(ExcelModel t){
         if(Commonstrings.xmbm.equals(t.getA())){//项目编码
             if(StringUtils.isNotBlank(distModel.getProjectNum())){
                 list.add(distModel);

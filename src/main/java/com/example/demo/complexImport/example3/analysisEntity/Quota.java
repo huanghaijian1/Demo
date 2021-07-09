@@ -3,7 +3,7 @@ package com.example.demo.complexImport.example3.analysisEntity;
 import lombok.Data;
 
 /**
- * 清单综合单价组成明细 定额
+ * 综合单价分析表  清单综合单价组成明细 定额
  */
 @Data
 public class Quota {

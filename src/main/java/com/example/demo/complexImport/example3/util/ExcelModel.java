@@ -2,6 +2,7 @@ package com.example.demo.complexImport.example3.util;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.Data;
+import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
@@ -12,61 +13,61 @@ import java.util.Map;
 public class ExcelModel {
 
     @ExcelProperty(index = 0)
-    private String a = "";
+    private String a;
     @ExcelProperty(index = 1)
-    private String b = "";
+    private String b;
     @ExcelProperty(index = 2)
-    private String c = "";
+    private String c;
     @ExcelProperty(index = 3)
-    private String d = "";
+    private String d;
     @ExcelProperty(index = 4)
-    private String e = "";
+    private String e;
     @ExcelProperty(index = 5)
-    private String f = "";
+    private String f;
     @ExcelProperty(index = 6)
-    private String g = "";
+    private String g;
     @ExcelProperty(index = 7)
-    private String h = "";
+    private String h;
     @ExcelProperty(index = 8)
-    private String i = "";
+    private String i;
     @ExcelProperty(index = 9)
-    private String j = "";
+    private String j;
     @ExcelProperty(index = 10)
-    private String k = "";
+    private String k;
     @ExcelProperty(index = 11)
-    private String l = "";
+    private String l;
     @ExcelProperty(index = 12)
-    private String m = "";
+    private String m;
     @ExcelProperty(index = 13)
-    private String n = "";
+    private String n;
     @ExcelProperty(index = 14)
-    private String o = "";
+    private String o;
     @ExcelProperty(index = 15)
-    private String p = "";
+    private String p;
     @ExcelProperty(index = 16)
-    private String q = "";
+    private String q;
     @ExcelProperty(index = 17)
-    private String r = "";
+    private String r;
     @ExcelProperty(index = 18)
-    private String s = "";
+    private String s;
     @ExcelProperty(index = 19)
-    private String t = "";
+    private String t;
     @ExcelProperty(index = 20)
-    private String u = "";
+    private String u;
     @ExcelProperty(index = 21)
-    private String v = "";
+    private String v;
     @ExcelProperty(index = 22)
-    private String w = "";
+    private String w;
     @ExcelProperty(index = 23)
-    private String x = "";
+    private String x;
     @ExcelProperty(index = 24)
-    private String y = "";
+    private String y;
     @ExcelProperty(index = 25)
-    private String z = "";
+    private String z;
 
 
     /**
-     *  键值对 表头名称：对应列单元格(内容再下)
+     *  键值对 表头名称：对应列单元格(表格内容纵向)
      * @param t1
      * @param t2
      * @param map
@@ -134,7 +135,7 @@ public class ExcelModel {
     }
 
     /**
-     * 键值对 表头名称：对应列单元格(内容再右边)
+     * 键值对 表头名称：对应列单元格(表格内容横向)
      * @param t
      * @param map
      */
@@ -221,7 +222,7 @@ public class ExcelModel {
     }
 
     /**
-     * 表头 -- 去掉换行符与首尾空格
+     * 表头 -- 去掉换行符与空格
      */
     public void replaceKg(ExcelModel t){
         t.setA(myReplace(t.getA()));
@@ -253,7 +254,7 @@ public class ExcelModel {
     }
 
     private String myReplace(String str){
-        return str.replace("\n", "").replace("\r", "").replace("\\s*", "");
+        return str==null?"":str.replace("\n", "").replace("\r", "").replace("\\s*", "");
     }
 
     /**
