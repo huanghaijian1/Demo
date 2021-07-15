@@ -10,7 +10,7 @@ import java.util.List;
  */
 
 @Data
-public class DistModel {
+public class CunitPrice {
     /**解析第一部分*/
     //序号 特殊格式的字段
     private String orderNum;

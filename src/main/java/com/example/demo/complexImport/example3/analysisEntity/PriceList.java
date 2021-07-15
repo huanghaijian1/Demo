@@ -2,7 +2,6 @@ package com.example.demo.complexImport.example3.analysisEntity;
 
 import lombok.Data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,31 +11,31 @@ import java.util.List;
 public class PriceList {
 
     //序号
-    private String xh;
+    private String serialNum;
 
     //项目编码
-    private String xmbm;
+    private String projectCode;
 
     //项目名称
-    private String xmmc;
+    private String projectName;
 
     //项目特征描述
-    private String xmtzms;
+    private String description;
 
     //计量单位
-    private String jldw;
+    private String unit;
 
     //工程量
-    private String gcl;
+    private String engineeringAmount;
 
     //综合单价
-    private String zhdj;
+    private String cUnitPrice;
 
     //合价
-    private String hj;
+    private String price;
 
     //暂估价
-    private String zgj;
+    private String pValuation;
 
     private List<ErrorRecord> errorRecordList;
 

@@ -2,9 +2,6 @@ package com.example.demo.complexImport.example3.analysisEntity;
 
 import lombok.Data;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * 单位工程招标控制价汇总表
  */
@@ -12,16 +9,16 @@ import java.util.Map;
 public class TenderControlPrice {
 
     //序号
-    private String xh;
+    private String serialNum;
 
     //汇总内容
-    private String hznr;
+    private String content;
 
     //金额
-    private String je;
+    private String amount;
 
     //备注
-    private String bz;
+    private String remarks;
 
     //数据错误标志 这里有错时只会是金额字段不为数据
     private boolean errorFlag = false;

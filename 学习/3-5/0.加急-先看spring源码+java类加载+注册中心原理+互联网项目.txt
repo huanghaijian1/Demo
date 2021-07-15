@@ -1,0 +1,16 @@
+spring系列  https://segmentfault.com/a/1190000020689625?utm_source=sf-similar-article
+
+spring bean 生命周期   https://segmentfault.com/a/1190000013875943?utm_source=sf-similar-article
+
+spring 循环依赖  https://segmentfault.com/a/1190000039091691?utm_source=sf-similar-article
+
+spring  aop
+
+spring ioc
+
+设计模式
+
+java类加载
+
+
+注册中心实现原理

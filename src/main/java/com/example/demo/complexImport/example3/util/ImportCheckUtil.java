@@ -23,8 +23,8 @@ public class ImportCheckUtil {
     public static boolean filterData(String keyword, String[] keywordArr, List<String> recordList){
            if(StringUtils.isNotBlank(keyword)){
                for(String str : keywordArr){
-                   if(keyword.equals(str)){
-                       recordList.add(keyword);
+                   if(str.contains(keyword)){
+                       recordList.add(str);
                        return true;
                    }
                }
@@ -77,27 +77,27 @@ public class ImportCheckUtil {
      */
     public static void checkpriceList(PriceList pl) {
         List<ErrorRecord> errorRecordList = new ArrayList<>();
-        if(StringUtils.isBlank(pl.getXmmc())){
+        if(StringUtils.isBlank(pl.getProjectName())){
             ErrorRecord errorRecord = new ErrorRecord(Commonstrings.error_xmzdz);
             errorRecordList.add(errorRecord);
         }
-        if(StringUtils.isBlank(pl.getXmtzms())){
+        if(StringUtils.isBlank(pl.getDescription())){
             ErrorRecord errorRecord = new ErrorRecord(Commonstrings.error_xmtzms);
             errorRecordList.add(errorRecord);
         }
-        if(StringUtils.isBlank(pl.getJldw())){
+        if(StringUtils.isBlank(pl.getUnit())){
             ErrorRecord errorRecord = new ErrorRecord(Commonstrings.error_jldw);
             errorRecordList.add(errorRecord);
         }
-        if(!checkNumber(pl.getGcl())){
+        if(!checkNumber(pl.getEngineeringAmount())){
             ErrorRecord errorRecord = new ErrorRecord(Commonstrings.error_gcl);
             errorRecordList.add(errorRecord);
         }
-        if(StringUtils.isBlank(pl.getZhdj())){
+        if(StringUtils.isBlank(pl.getCUnitPrice())){
             ErrorRecord errorRecord = new ErrorRecord(Commonstrings.error_zhdj);
             errorRecordList.add(errorRecord);
         }
-        if(StringUtils.isBlank(pl.getHj())){
+        if(StringUtils.isBlank(pl.getPrice())){
             ErrorRecord errorRecord = new ErrorRecord(Commonstrings.error_hj);
             errorRecordList.add(errorRecord);
         }
@@ -110,19 +110,19 @@ public class ImportCheckUtil {
      */
     public static void checkTalentAndMachine(TalentAndMachine pam) {
         List<ErrorRecord> errorRecordList = new ArrayList<>();
-        if(StringUtils.isBlank(pam.getMc())){
+        if(StringUtils.isBlank(pam.getName())){
             ErrorRecord errorRecord = new ErrorRecord(Commonstrings.error_clmc);
             errorRecordList.add(errorRecord);
         }
-        if(StringUtils.isBlank(pam.getDw())){
+        if(StringUtils.isBlank(pam.getUnit())){
             ErrorRecord errorRecord = new ErrorRecord(Commonstrings.error_dw);
             errorRecordList.add(errorRecord);
         }
-        if(!checkNumber(pam.getSl())){
+        if(!checkNumber(pam.getCount())){
             ErrorRecord errorRecord = new ErrorRecord(Commonstrings.error_sl);
             errorRecordList.add(errorRecord);
         }
-        if(!checkNumber(pam.getScj())){
+        if(!checkNumber(pam.getUnitPrice())){
             ErrorRecord errorRecord = new ErrorRecord(Commonstrings.error_scj);
             errorRecordList.add(errorRecord);
         }
@@ -131,64 +131,67 @@ public class ImportCheckUtil {
 
     /**
      *  综合单价分析表数据校验(及纠正) 定额所有费用为0时，需通过材料费明细纠正
-     * @param distModelList 综合单价分析表
+     * @param cunitPriceList 综合单价分析表
      * @param priceListList 分部分项工程和单价措施项目清单与计价表 为空时不做联合校验
      */
-    public static void checkCunitPrice(List<DistModel> distModelList, List<PriceList> priceListList) {
-        List<ErrorRecord> errorRecordList = new ArrayList<>();
+    public static void checkCunitPrice(List<CunitPrice> cunitPriceList, List<PriceList> priceListList) {
         //联合校验
         boolean jvFlag = true;
         if(priceListList == null || priceListList.size()==0){
             jvFlag = false;
         }
         ErrorRecord errorRecord = new ErrorRecord(Commonstrings.error_dexx);
-        for(int y = 0; y<distModelList.size(); y++){
-            DistModel dm = distModelList.get(y);
+        for(int y = 0; y<cunitPriceList.size(); y++){
+            List<ErrorRecord> errorRecordList = new ArrayList<>();
+            CunitPrice cp = cunitPriceList.get(y);
             //联合校验
             PriceList priceList = null;
             if(jvFlag){
                 for(int i = 0; i<priceListList.size();i++){
                     PriceList pl = priceListList.get(i);
-                    if(StringUtils.equals(pl.getXmbm(),dm.getProjectNum())){
+                    if(StringUtils.equals(pl.getProjectCode(),cp.getProjectNum())){
                         priceList = pl;
                         i = priceListList.size();
                     }
                 }
                 if(priceList == null){//综合单价分析表里的编码在分部分项里找不到
                     errorRecordList.add(errorRecord);
+                    cp.setErrorRecordList(errorRecordList);
                     continue;
                 }
             }
 
             //综合单价分析表内校验
-            if(!checkProjectNum(dm.getProjectNum())
-                    ||StringUtils.isBlank(dm.getCountUnit())
-                    ||!checkNumber(dm.getWord())
-                    ||!checkNumber2(dm.getSubtotalLaborCost())
-                    ||!checkNumber2(dm.getSubtotalMachineryCost())
-                    ||!checkNumber2(dm.getSubtotalMaterialCost())
-                    ||!checkNumber2(dm.getSubtotalProfit())
-                    ||!checkNumber2(dm.getUnpricedMaterialCost())
-                    ||!checkNumber2(dm.getOtherTotalPrice())
-                    ||!checkNumber2(dm.getOtherEstTotalPrice())
-                    ||!checkNumber2(dm.getTotalTotalPrice())
-                    ||!checkNumber2(dm.getTotalEstTotalPrice())
+            if(!checkProjectNum(cp.getProjectNum())
+                    ||StringUtils.isBlank(cp.getCountUnit())
+                    ||!checkNumber(cp.getWord())
+                    ||!checkNumber2(cp.getSubtotalLaborCost())
+                    ||!checkNumber2(cp.getSubtotalMachineryCost())
+                    ||!checkNumber2(cp.getSubtotalMaterialCost())
+                    ||!checkNumber2(cp.getSubtotalProfit())
+                    ||!checkNumber2(cp.getUnpricedMaterialCost())
+                    ||!checkNumber2(cp.getOtherTotalPrice())
+                    ||!checkNumber2(cp.getOtherEstTotalPrice())
+                    ||!checkNumber2(cp.getTotalTotalPrice())
+                    ||!checkNumber2(cp.getTotalEstTotalPrice())
             ){
                 errorRecordList.add(errorRecord);
+                cp.setErrorRecordList(errorRecordList);
                 continue;
             }
             //材料费明细列表
-            List<MaterialCostDetails> materialCostDetailsList = dm.getMaterialCostDetailsList();
+            List<MaterialCostDetails> materialCostDetailsList = cp.getMaterialCostDetailsList();
             long dErrorCount = materialCostDetailsList.stream().filter(a->
                     StringUtils.isBlank(a.getInformation())||StringUtils.isBlank(a.getUnit())
                             || !checkNumber(a.getCount()) ||!checkNumber(a.getUnitPrice())||!checkNumber(a.getTotalPrice())
             ).count();
             if(dErrorCount>0){
                 errorRecordList.add(errorRecord);
+                cp.setErrorRecordList(errorRecordList);
                 continue;
             }
 
-            List<Quota> quotaList = dm.getQuotaList();
+            List<Quota> quotaList = cp.getQuotaList();
             BigDecimal rgfjsSum = new BigDecimal(0);//人工费计算
             BigDecimal clfSum = new BigDecimal(0);//材料费计算
             BigDecimal jxfSum = new BigDecimal(0);//机械费计算
@@ -216,13 +219,14 @@ public class ImportCheckUtil {
                     flag1 = true;
                 }else{
                     BigDecimal rgfhj = new BigDecimal(StringUtils.isBlank(i.getTotalLaborCost())?"0":i.getTotalLaborCost());
-                    BigDecimal clfhj = new BigDecimal(StringUtils.isBlank(i.getTotalMachineryCost())?"0":i.getTotalMachineryCost());
-                    BigDecimal jxfhj = new BigDecimal(StringUtils.isBlank(i.getTotalMaterialCost())?"0":i.getTotalMaterialCost());
+                    BigDecimal clfhj = new BigDecimal(StringUtils.isBlank(i.getTotalMaterialCost())?"0":i.getTotalMaterialCost());
+                    BigDecimal jxfhj = new BigDecimal(StringUtils.isBlank(i.getTotalMachineryCost())?"0":i.getTotalMachineryCost());
+
                     BigDecimal glhlrhj = new BigDecimal(StringUtils.isBlank(i.getTotalProfit())?"0":i.getTotalProfit());
-                    rgfjsSum.add(rgfhj);
-                    clfSum.add(clfhj);
-                    jxfSum.add(jxfhj);
-                    glhlrSum.add(glhlrhj);
+                    rgfjsSum = rgfjsSum.add(rgfhj);
+                    clfSum = clfSum.add(clfhj);
+                    jxfSum = jxfSum.add(jxfhj);
+                    glhlrSum = glhlrSum.add(glhlrhj);
                 }
                 //数据纠正
                 //判断是否需要数据纠正 等额列表里费用字段全部为0
@@ -243,6 +247,10 @@ public class ImportCheckUtil {
                             BigDecimal clhj = new BigDecimal(details.getTotalPrice());
                             i.setMaterialCost(String.valueOf(clsl.multiply(cldj).setScale(2,BigDecimal.ROUND_HALF_UP)));
                             i.setTotalMaterialCost(String.valueOf(clsl.multiply(clhj).setScale(2,BigDecimal.ROUND_HALF_UP)));
+                            BigDecimal totalMaterialCost = new BigDecimal(i.getTotalMaterialCost());
+                            clfSum = clfSum.add(totalMaterialCost);
+                            cp.setSubtotalMaterialCost(String.valueOf(new BigDecimal(StringUtils.isBlank(cp.getSubtotalMaterialCost())?"0":cp.getSubtotalMaterialCost()).add(totalMaterialCost)));
+                            cp.setAllInUnitRate(String.valueOf(new BigDecimal(StringUtils.isBlank(cp.getAllInUnitRate())?"0":cp.getAllInUnitRate()).add(totalMaterialCost)));
                             t = materialCostDetailsList.size();
                         }
                     }
@@ -252,29 +260,33 @@ public class ImportCheckUtil {
 
             if(flag1){//等额部分校验有异常
                 errorRecordList.add(errorRecord);
+                cp.setErrorRecordList(errorRecordList);
                 continue;
             }
-            if(rgfjsSum.compareTo(new BigDecimal(StringUtils.isBlank(dm.getSubtotalLaborCost())?"0":dm.getSubtotalLaborCost()))==-1
-                    ||clfSum.compareTo(new BigDecimal(StringUtils.isBlank(dm.getSubtotalMachineryCost())?"0":dm.getSubtotalMachineryCost()))==-1
-                    ||jxfSum.compareTo(new BigDecimal(StringUtils.isBlank(dm.getSubtotalMaterialCost())?"0":dm.getSubtotalMaterialCost()))==-1
-                    ||glhlrSum.compareTo(new BigDecimal(StringUtils.isBlank(dm.getSubtotalProfit())?"0":dm.getSubtotalProfit()))==-1
+            if(rgfjsSum.compareTo(new BigDecimal(StringUtils.isBlank(cp.getSubtotalLaborCost())?"0":cp.getSubtotalLaborCost()))!=0
+                    ||jxfSum.compareTo(new BigDecimal(StringUtils.isBlank(cp.getSubtotalMachineryCost())?"0":cp.getSubtotalMachineryCost()))!=0
+                    ||clfSum.compareTo(new BigDecimal(StringUtils.isBlank(cp.getSubtotalMaterialCost())?"0":cp.getSubtotalMaterialCost()))!=0
+                    ||glhlrSum.compareTo(new BigDecimal(StringUtils.isBlank(cp.getSubtotalProfit())?"0":cp.getSubtotalProfit()))!=0
             ){ //人工费等小计验算
                 errorRecordList.add(errorRecord);
+                cp.setErrorRecordList(errorRecordList);
                 continue;
             }
             //有一种格式会拿不到综合单价，这里拿分部分项里面的综合单价
-            if(!checkNumber(dm.getAllInUnitRate())){
+            if(!checkNumber(cp.getAllInUnitRate())){
                 if(jvFlag){//做跨联合校验
-                    dm.setAllInUnitRate(priceList.getZhdj());
+                    cp.setAllInUnitRate(priceList.getCUnitPrice());
                 }else {
                     errorRecordList.add(errorRecord);
+                    cp.setErrorRecordList(errorRecordList);
                     continue;
                 }
             }
-            if(rgfjsSum.add(clfSum).add(jxfSum).add(jxfSum).add(glhlrSum)
-                    .add(new BigDecimal(StringUtils.isBlank(dm.getUnpricedMaterialCost())?"0":dm.getUnpricedMaterialCost()))
-                    .compareTo(new BigDecimal(dm.getAllInUnitRate()))==-1){//综合单价验算
+            if(rgfjsSum.add(clfSum).add(jxfSum).add(glhlrSum)
+                    .add(new BigDecimal(StringUtils.isBlank(cp.getUnpricedMaterialCost())?"0":cp.getUnpricedMaterialCost()))
+                    .compareTo(new BigDecimal(cp.getAllInUnitRate()))!=0){//综合单价验算
                 errorRecordList.add(errorRecord);
+                cp.setErrorRecordList(errorRecordList);
             }
         }
 
@@ -285,8 +297,8 @@ public class ImportCheckUtil {
         BigDecimal big1 = new BigDecimal(StringUtils.isBlank(str1)?"0":str1);
         BigDecimal big2 = new BigDecimal(StringUtils.isBlank(str2)?"0":str2);
         BigDecimal big3 = new BigDecimal(StringUtils.isBlank(str3)?"0":str3);
-        int flag = big1.multiply(big2).setScale(2,BigDecimal.ROUND_HALF_UP).compareTo(big3.setScale(2,BigDecimal.ROUND_HALF_UP));
-        return flag ==-1;
+        int flag = big1.multiply(big2).setScale(2,BigDecimal.ROUND_HALF_UP).compareTo(big3);
+        return flag !=0;
     }
 
 

@@ -47,7 +47,7 @@ public class Commonstrings {
     //sheet页相关标志
     public final static String sheetMapKey_rcjhzb1 = "单位工程人材机汇总表";
     //单位工程人材机汇总表 /主要材料设备价格表/主要材料价格表/发包人提供材料和工程设备一览表/承包人提供主要材料和工程设备一览表
-    public final static String rcjhzbbz1[] = {"单位工程人材机汇总表 ","主要材料设备价格表","主要材料价格表","发包人提供材料和工程设备一览表","承包人提供主要材料和工程设备一览表"};
+    public final static String rcjhzbbz1[] = {"单位工程人材机汇总表","主要材料设备价格表","主要材料价格表","发包人提供材料和工程设备一览表","承包人提供主要材料和工程设备一览表"};
     public final static String rcjhzbbz2[] = {"序号","名称及规格","单位","数量","市场价","合计"};
     public final static String rcjhzbbz3[] = {"材料名称","规格","型号","特殊要求","单位","数量","单价"};
     //重要标志
@@ -82,7 +82,7 @@ public class Commonstrings {
 //    public final static String xh = "序号";
     public final static String kyjx_zbkzjhzb = "本表适用于单位工程招标控制价或投标报价的汇总";
     //分部分项合计/分部分项、措施合计、其他项目、规费、税金、总造价
-    public final static String[] keywordArr_zbkzjhzb = {"分部分项合计","分部分项","措施合计","其他项目","规费","税金","总造价"};
+    public final static String[] keywordArr_zbkzjhzb = {"分部分项合计","措施合计","其他项目","规费","税金","总造价"};
 
     //表头
     public final static String xhbt[] = {"序号"};

@@ -11,26 +11,24 @@ import java.util.List;
 public class TalentAndMachine {
     //材料名称、规格型号、单位、数量、单价
     //序号
-    private String xh;
+    private String serialNum;
 
-    //名称及规格
-    private String mcjkg;
-    //名称
-    private String mc;
+    //名称(名称及规格)
+    private String name;
     //规格
-    private String ge;
+    private String specification;
 
     //单位
-    private String dw;
+    private String unit;
 
     //数量
-    private String sl;
+    private String count;
 
     //市场价/单价
-    private String scj;
+    private String unitPrice;
 
-    //合计
-    private String hj;
+    //合价
+    private String price;
 
     private List<ErrorRecord> errorRecordList;
 

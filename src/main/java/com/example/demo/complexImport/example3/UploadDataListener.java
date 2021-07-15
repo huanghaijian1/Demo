@@ -27,9 +27,9 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
      * 综合单价分析表
      */
     //解析的数据
-    List<DistModel> list = new ArrayList<>();
+    List<CunitPrice> list = new ArrayList<>();
 
-    DistModel distModel = new DistModel();
+    CunitPrice cunitPrice = new CunitPrice();
 
     //是否为特殊模板
     boolean specialFlag = false;
@@ -97,13 +97,13 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
     public Map<String,Object> allAnalysisAndVerification(){
         List<Object> objectList = tenderControlPrice();//已完成校验
         List<PriceList> priceListList = priceList();//已完成校验
-        List<DistModel> distModelList = analysisData();
-        ImportCheckUtil.checkCunitPrice(distModelList,priceListList);//综合单价分析表校验
+        List<CunitPrice> cunitPriceList = analysisData();
+        ImportCheckUtil.checkCunitPrice(cunitPriceList,priceListList);//综合单价分析表校验
         List<TalentAndMachine> talentAndMachineList = talentAndMachine();//已完成校验
         Map<String,Object> resultMap = new HashMap<>();
         resultMap.put(Commonstrings.sheetMapKey_zbkzjhzb,objectList);
         resultMap.put(Commonstrings.sheetMapKey_qdyjjb,priceListList);
-        resultMap.put(Commonstrings.sheetMapKey_zhdjfxb,distModelList);
+        resultMap.put(Commonstrings.sheetMapKey_zhdjfxb,cunitPriceList);
         resultMap.put(Commonstrings.sheetMapKey_rcjhzb1,talentAndMachineList);
         return resultMap;
     }
@@ -256,14 +256,14 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
                 String hznr = t.setTableData(headerMap5,t,Commonstrings.hznrbt);
                 boolean flag = ImportCheckUtil.filterData(hznr,Commonstrings.keywordArr_zbkzjhzb,recordList);
                 if(flag){//只获取指定数据
-                    tp.setXh(t.setTableData(headerMap5,t,Commonstrings.xhbt));
-                    tp.setHznr(hznr);
+                    tp.setSerialNum(t.setTableData(headerMap5,t,Commonstrings.xhbt));
+                    tp.setContent(hznr);
                     String je = t.setTableData(headerMap5,t,Commonstrings.jebt);
                     if(!ImportCheckUtil.checkNumber(je)){
                         tp.setErrorFlag(true);
                     }
-                    tp.setJe(t.setTableData(headerMap5,t,Commonstrings.jebt));
-                    tp.setBz(t.setTableData(headerMap5,t,Commonstrings.bzbt));
+                    tp.setAmount(t.setTableData(headerMap5,t,Commonstrings.jebt));
+                    tp.setRemarks(t.setTableData(headerMap5,t,Commonstrings.bzbt));
                     result.add(tp);
                 }
 
@@ -279,8 +279,11 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
 
         }
         //是否汇总内容为 "分部分项合计"/"分部分项","措施合计","其他项目","规费","税金","总造价"的数据都有
-        List<String> defectList = Arrays.asList(Commonstrings.keywordArr_zbkzjhzb);
-        defectList.removeAll(recordList);//缺失汇总数据集合
+        List<String> defectList = new ArrayList<>();//缺失汇总数据集合
+        for(String str1 : Commonstrings.keywordArr_zbkzjhzb){//Arrays.asList()的坑：不支持list.addAll,list.removeAll等
+            defectList.add(str1);
+        }
+        defectList.removeAll(recordList);
         List<Object> resultList = new ArrayList<>();
         resultList.add(result);//读取到的必要数据  errorFlag=true时，金额字段有误
         resultList.add(defectList);//缺失的必要数据
@@ -311,15 +314,15 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
                 String xmbm = t.setTableData(headerMap,t,Commonstrings.xmbm_qdyjjb);
                 if(ImportCheckUtil.checkProjectNum(xmbm)){
                     PriceList pl = new PriceList();
-                    pl.setXh(t.setTableData(headerMap,t,Commonstrings.xhbt_qdyjjb));
-                    pl.setXmbm(xmbm);
-                    pl.setXmmc(t.setTableData(headerMap,t,Commonstrings.xmmc_qdyjjb));
-                    pl.setXmtzms(t.setTableData(headerMap,t,Commonstrings.xmtz_qdyjjb));
-                    pl.setJldw(t.setTableData(headerMap,t,Commonstrings.jldw_qdyjjb));
-                    pl.setGcl(t.setTableData(headerMap,t,Commonstrings.gcl_qdyjjb));
-                    pl.setZhdj(t.setTableData(headerMap,t,Commonstrings.zhdj_qdyjjb));
-                    pl.setHj(t.setTableData(headerMap,t,Commonstrings.hj_qdyjjb));
-                    pl.setZgj(t.setTableData(headerMap,t,Commonstrings.zgj_qdyjjb));
+                    pl.setSerialNum(t.setTableData(headerMap,t,Commonstrings.xhbt_qdyjjb));
+                    pl.setProjectCode(xmbm);
+                    pl.setProjectName(t.setTableData(headerMap,t,Commonstrings.xmmc_qdyjjb));
+                    pl.setDescription(t.setTableData(headerMap,t,Commonstrings.xmtz_qdyjjb));
+                    pl.setUnit(t.setTableData(headerMap,t,Commonstrings.jldw_qdyjjb));
+                    pl.setEngineeringAmount(t.setTableData(headerMap,t,Commonstrings.gcl_qdyjjb));
+                    pl.setCUnitPrice(t.setTableData(headerMap,t,Commonstrings.zhdj_qdyjjb));
+                    pl.setPrice(t.setTableData(headerMap,t,Commonstrings.hj_qdyjjb));
+                    pl.setPValuation(t.setTableData(headerMap,t,Commonstrings.zgj_qdyjjb));
                     ImportCheckUtil.checkpriceList(pl);//数据校验
                     result.add(pl);
                 }
@@ -369,17 +372,17 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
             //本行数据
             if(textFlag){//为正文数据
                 TalentAndMachine pam = new TalentAndMachine();
-                pam.setXh(t.setTableData(headerMap,t,Commonstrings.xhbt_rcjhzb));
+                pam.setSerialNum(t.setTableData(headerMap,t,Commonstrings.xhbt_rcjhzb));
                 if(tableType){
-                    pam.setMc(t.setTableData(headerMap,t,Commonstrings.mcjkg_rcjhzb));
-                    pam.setHj(t.setTableData(headerMap,t,Commonstrings.hj_rcjhzb));
+                    pam.setName(t.setTableData(headerMap,t,Commonstrings.mcjkg_rcjhzb));
+                    pam.setPrice(t.setTableData(headerMap,t,Commonstrings.hj_rcjhzb));
                 }else{
-                    pam.setMc(t.setTableData(headerMap,t,Commonstrings.clmc_rcjhzb));
-                    pam.setGe(t.setTableData(headerMap,t,Commonstrings.kgxhd_rcjhzb));
+                    pam.setName(t.setTableData(headerMap,t,Commonstrings.clmc_rcjhzb));
+                    pam.setSpecification(t.setTableData(headerMap,t,Commonstrings.kgxhd_rcjhzb));
                 }
-                pam.setDw(t.setTableData(headerMap,t,Commonstrings.dw_rcjhzb));
-                pam.setSl(t.setTableData(headerMap,t,Commonstrings.sl_rcjhzb));
-                pam.setScj(t.setTableData(headerMap,t,Commonstrings.scj_rcjhzb));
+                pam.setUnit(t.setTableData(headerMap,t,Commonstrings.dw_rcjhzb));
+                pam.setCount(t.setTableData(headerMap,t,Commonstrings.sl_rcjhzb));
+                pam.setUnitPrice(t.setTableData(headerMap,t,Commonstrings.scj_rcjhzb));
                 //数据校验
                 ImportCheckUtil.checkTalentAndMachine(pam);
                 result.add(pam);
@@ -400,7 +403,7 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
      * 综合单价分析表-解析数据
      * @return
      */
-    private List<DistModel> analysisData(){
+    private List<CunitPrice> analysisData(){
         List<ExcelModel> modelList = allSheetMap.get(Commonstrings.sheetMapKey_zhdjfxb);
         List<CellExtra> cellExtraList = extraMergeInfoMap.get(Commonstrings.sheetMapKey_zhdjfxb);
         List<ExcelModel> data = explainMergeData(modelList, cellExtraList, headRowNumber);
@@ -429,17 +432,17 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
         }
 
         if(specialTextFlag){//正文内容
-           distModel.setOrderNum(t.setTableData(headerMap4,t,Commonstrings.tsxhbt));
-           distModel.setProjectNum(t.setTableData(headerMap4,t,Commonstrings.tsxmbmbt));
-           distModel.setProjectName(t.setTableData(headerMap4,t,Commonstrings.tsxmmcbt));
-           distModel.setFeatures(t.setTableData(headerMap4,t,Commonstrings.tsxmtzbt));
-           distModel.setTotalLaborCost(t.setTableData(headerMap4,t,Commonstrings.tsrgfbt));
-           distModel.setTotalMaterialCost(t.setTableData(headerMap4,t,Commonstrings.tsclfbt));
-           distModel.setTotalMachineryCost(t.setTableData(headerMap4,t,Commonstrings.tsjlfbt));
-           distModel.setTotalProfit(t.setTableData_glylr(headerMap4,t,Commonstrings.tsglylrbt,Commonstrings.tsglfbt,Commonstrings.tslrbt));
-           distModel.setAllInUnitRate(t.setTableData(headerMap4,t,Commonstrings.tszhdjbt));
-           list.add(distModel);
-           distModel = new DistModel();
+            cunitPrice.setOrderNum(t.setTableData(headerMap4,t,Commonstrings.tsxhbt));
+            cunitPrice.setProjectNum(t.setTableData(headerMap4,t,Commonstrings.tsxmbmbt));
+            cunitPrice.setProjectName(t.setTableData(headerMap4,t,Commonstrings.tsxmmcbt));
+            cunitPrice.setFeatures(t.setTableData(headerMap4,t,Commonstrings.tsxmtzbt));
+            cunitPrice.setTotalLaborCost(t.setTableData(headerMap4,t,Commonstrings.tsrgfbt));
+            cunitPrice.setTotalMaterialCost(t.setTableData(headerMap4,t,Commonstrings.tsclfbt));
+            cunitPrice.setTotalMachineryCost(t.setTableData(headerMap4,t,Commonstrings.tsjlfbt));
+            cunitPrice.setTotalProfit(t.setTableData_glylr(headerMap4,t,Commonstrings.tsglylrbt,Commonstrings.tsglfbt,Commonstrings.tslrbt));
+            cunitPrice.setAllInUnitRate(t.setTableData(headerMap4,t,Commonstrings.tszhdjbt));
+           list.add(cunitPrice);
+            cunitPrice = new CunitPrice();
         }
 
         if(Commonstrings.rgf.equals(t.getE())){
@@ -458,9 +461,9 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
      */
     private void template1(ExcelModel t){
         if(Commonstrings.xmbm.equals(t.getA())){//项目编码
-            if(StringUtils.isNotBlank(distModel.getProjectNum())){
-                list.add(distModel);
-                distModel = new DistModel();
+            if(StringUtils.isNotBlank(cunitPrice.getProjectNum())){
+                list.add(cunitPrice);
+                cunitPrice = new CunitPrice();
                 //清单综合单价组成明细解析标志
                 quotaFlag = false;
                 //材料费明细解析标志
@@ -474,19 +477,19 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
                 headerMap1 = new HashMap<>(64);
                 t.setHeaderMap2(t,headerMap1);
             }
-            distModel.setProjectNum(t.setTableData(headerMap1,t,Commonstrings.xmbmbt));
-            distModel.setProjectName(t.setTableData(headerMap1,t,Commonstrings.xmmcbt));
-            distModel.setCountUnit(t.setTableData(headerMap1,t,Commonstrings.jldwbt));
-            distModel.setWord(t.setTableData(headerMap1,t,Commonstrings.gclbt));
+            cunitPrice.setProjectNum(t.setTableData(headerMap1,t,Commonstrings.xmbmbt));
+            cunitPrice.setProjectName(t.setTableData(headerMap1,t,Commonstrings.xmmcbt));
+            cunitPrice.setCountUnit(t.setTableData(headerMap1,t,Commonstrings.jldwbt));
+            cunitPrice.setWord(t.setTableData(headerMap1,t,Commonstrings.gclbt));
         }
 
         //小计
         if(Commonstrings.rgdj.equals(t.getA())){
             //列单元格对应于 headerMap2 的 合价人工费，合价材料费，合价机械费，合价管理费与利润
-            distModel.setSubtotalLaborCost(t.setTableData(headerMap2,t,Commonstrings.hjrgf));
-            distModel.setSubtotalMaterialCost(t.setTableData(headerMap2,t,Commonstrings.hjclf));
-            distModel.setSubtotalMachineryCost(t.setTableData(headerMap2,t,Commonstrings.hjjxf));
-            distModel.setSubtotalProfit(t.setTableData_glylr(headerMap2,t,Commonstrings.hjglfylr,Commonstrings.hjglf,Commonstrings.hjlr));
+            cunitPrice.setSubtotalLaborCost(t.setTableData(headerMap2,t,Commonstrings.hjrgf));
+            cunitPrice.setSubtotalMaterialCost(t.setTableData(headerMap2,t,Commonstrings.hjclf));
+            cunitPrice.setSubtotalMachineryCost(t.setTableData(headerMap2,t,Commonstrings.hjjxf));
+            cunitPrice.setSubtotalProfit(t.setTableData_glylr(headerMap2,t,Commonstrings.hjglfylr,Commonstrings.hjglf,Commonstrings.hjlr));
             //清单综合单价组成明细解析标志
             quotaFlag = false;
             //跨页解析标志
@@ -497,22 +500,22 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
         if(Commonstrings.wjjclf.equals(t.getC())){//未计价材料费
             //列单元格对应于 headerMap2 的 定额编号，合价人工费
             //人工单价
-            distModel.setLaborPrice(t.setTableData(headerMap2,t,Commonstrings.debh));
+            cunitPrice.setLaborPrice(t.setTableData(headerMap2,t,Commonstrings.debh));
             //未计价材料费
-            distModel.setUnpricedMaterialCost(t.setTableData(headerMap2,t,Commonstrings.hjrgf));
+            cunitPrice.setUnpricedMaterialCost(t.setTableData(headerMap2,t,Commonstrings.hjrgf));
         }
 
         if(Commonstrings.qdxmzhdj.equals(t.getA())){//清单项目综合单价
-            distModel.setAllInUnitRate(t.setTableData(headerMap2,t,Commonstrings.hjrgf));
+            cunitPrice.setAllInUnitRate(t.setTableData(headerMap2,t,Commonstrings.hjrgf));
         }
 
         //其他材料费
         if(Commonstrings.qtclf.equals(t.getB()) && Commonstrings.qtclf.equals(t.setTableData(headerMap3,t,Commonstrings.cldw))){
             //列单元格对应于 headerMap3 的 单价（元），合价（元），暂估单价（元），暂估合价（元）
-            distModel.setOtherUnitPrice(t.setTableData(headerMap3,t,Commonstrings.cldj));
-            distModel.setOtherTotalPrice(t.setTableData(headerMap3,t,Commonstrings.clhj));
-            distModel.setOtherEstUnitPrice(t.setTableData(headerMap3,t,Commonstrings.clzgdj));
-            distModel.setOtherEstTotalPrice(t.setTableData(headerMap3,t,Commonstrings.clzghj));
+            cunitPrice.setOtherUnitPrice(t.setTableData(headerMap3,t,Commonstrings.cldj));
+            cunitPrice.setOtherTotalPrice(t.setTableData(headerMap3,t,Commonstrings.clhj));
+            cunitPrice.setOtherEstUnitPrice(t.setTableData(headerMap3,t,Commonstrings.clzgdj));
+            cunitPrice.setOtherEstTotalPrice(t.setTableData(headerMap3,t,Commonstrings.clzghj));
             //材料费明细解析标志
             detailsFlag = false;
             //跨页解析标志
@@ -524,12 +527,12 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
         //一般 材料费小计 为一个清单的结束
         if(Commonstrings.clfxj.equals(t.getB())){//"材料费小计"
             //列单元格对应于 headerMap3 的 单价（元），合价（元），暂估单价（元），暂估合价（元）
-            distModel.setTotalUnitPrice(t.setTableData(headerMap3,t,Commonstrings.cldj));
-            distModel.setTotalTotalPrice(t.setTableData(headerMap3,t,Commonstrings.clhj));
-            distModel.setTotalEstUnitPrice(t.setTableData(headerMap3,t,Commonstrings.clzgdj));
-            distModel.setTotalEstTotalPrice(t.setTableData(headerMap3,t,Commonstrings.clzghj));
-            list.add(distModel);
-            distModel = new DistModel();
+            cunitPrice.setTotalUnitPrice(t.setTableData(headerMap3,t,Commonstrings.cldj));
+            cunitPrice.setTotalTotalPrice(t.setTableData(headerMap3,t,Commonstrings.clhj));
+            cunitPrice.setTotalEstUnitPrice(t.setTableData(headerMap3,t,Commonstrings.clzgdj));
+            cunitPrice.setTotalEstTotalPrice(t.setTableData(headerMap3,t,Commonstrings.clzghj));
+            list.add(cunitPrice);
+            cunitPrice = new CunitPrice();
             //材料费明细解析标志
             detailsFlag = false;
             //跨页解析标志
@@ -550,9 +553,9 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
             }
             //不是跨页解析
             if(!(pageQuotaFlag || pagedetailsFlag)){
-                if(StringUtils.isNotBlank(distModel.getProjectNum())){//特殊情况，此时也为一个清单的结束
-                    list.add(distModel);
-                    distModel = new DistModel();
+                if(StringUtils.isNotBlank(cunitPrice.getProjectNum())){//特殊情况，此时也为一个清单的结束
+                    list.add(cunitPrice);
+                    cunitPrice = new CunitPrice();
                     quotaFlag = false;
                     detailsFlag = false;
                 }
@@ -577,7 +580,7 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
             quota.setTotalMachineryCost(t.setTableData(headerMap2,t,Commonstrings.hjjxf));
             quota.setTotalProfit(t.setTableData_glylr(headerMap2,t,Commonstrings.hjglfylr,Commonstrings.hjglf,Commonstrings.hjlr));
 
-            distModel.getQuotaList().add(quota);
+            cunitPrice.getQuotaList().add(quota);
         }
 
         //材料费明细
@@ -590,7 +593,7 @@ public class UploadDataListener<T> extends AnalysisEventListener<T> {
             details.setTotalPrice(t.setTableData(headerMap3,t,Commonstrings.clhj));
             details.setEstUnitPrice(t.setTableData(headerMap3,t,Commonstrings.clzgdj));
             details.setEstTotalPrice(t.setTableData(headerMap3,t,Commonstrings.clzghj));
-            distModel.getMaterialCostDetailsList().add(details);
+            cunitPrice.getMaterialCostDetailsList().add(details);
         }
 
         if(Commonstrings.debhbz.equals(t.getA())){
