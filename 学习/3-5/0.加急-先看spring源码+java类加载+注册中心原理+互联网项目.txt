@@ -8,9 +8,22 @@ spring  aop
 
 spring ioc
 
+mysql数据库表设计 + 数据连接url
+  例如:jdbc:mysql://172.16.4.50:3306/syy_standard_consult_local?allowMultiQueries=true&autoReconnect=true&useSSL=false&characterEncoding=utf-8
+  ?后面的参数的了解
+
 设计模式
+
+
+注册中心实现原理
+
 
 java类加载
 
 
-注册中心实现原理
+redis集群及基础
+
+
+jvm
+
+
