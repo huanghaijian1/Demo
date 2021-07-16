@@ -2,6 +2,7 @@ package com.example.demo.test;
 
 import com.example.demo.DemoApplication;
 import com.example.demo.domain.Person;
+import com.example.demo.domain.TenderControlPrice;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.junit.Test;
@@ -13,9 +14,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.query.*;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 public class ElasticSearchTest {
@@ -64,5 +63,28 @@ public class ElasticSearchTest {
     public void testDeleteDoc() throws Exception{
         String documentId = elasticsearchRestTemplate.delete(Person.class,"1005");
         System.out.println(documentId);
+    }
+
+
+    public static void main(String[] args) {
+        TenderControlPrice a = new TenderControlPrice();
+        a.setSerialNum("1");
+        a.setContent("哈哈哈");
+        a.setAmount("1122.22");
+
+        TenderControlPrice b = new TenderControlPrice();
+        b.setSerialNum("2");
+        b.setContent("哈哈哈");
+        b.setAmount("1112.22");
+        TenderControlPrice c = new TenderControlPrice();
+        c.setSerialNum("2");
+        c.setContent("哈哈");
+        c.setAmount("11162.22");
+        Set<TenderControlPrice> set = new HashSet<>();
+        set.add(a);
+        set.add(b);
+        set.add(c);
+
+        System.out.println(set);
     }
 }
