@@ -1,0 +1,52 @@
+0.加急-先看spring源码+java类加载+注册中心原理+互联网项目
+spring系列  https://segmentfault.com/a/1190000020689625?utm_source=sf-similar-article
+
+spring bean 生命周期   https://segmentfault.com/a/1190000013875943?utm_source=sf-similar-article
+  1.Spring 只帮我们管理单例模式 Bean 的完整生命周期，对于 prototype 的 bean ，Spring 在创建好交给使用者之后则不会再管理后续的生命周期。
+
+  Bean 的生命周期
+  1.Spring启动，查找并加载需要被Spring管理的bean，进行Bean的实例化
+  2.Bean实例化后对将Bean属性注入值（3-9可以对Bean属性注入值）
+  3.如果Bean实现了BeanNameAware接口的话，Spring将调用setBeanName()方法，将Bean的id 传进来
+  4.如果Bean实现了BeanFactoryAware接口的话，Spring将调用setBeanFactory()方法，将BeanFactory容器实例传进来
+  5.如果Bean实现了ApplicationContextAware接口的话，Spring将调用Bean的setApplicationContext()方法，将bean所在应用上下文引用传进来。
+  6.如果Bean实现了BeanPostProcessor接口，Spring就将调用他们的BeanPostProcessor.postProcessBeforeInitialization()方法
+  7.如果Bean中方法标注注解@PostConstruct，就执行该方法
+  8.如果Bean 实现了InitializingBean接口，Spring将调用他们的InitializingBean.afterPropertiesSet()方法。同时，如果bean使用init-method声明了初始化方法，该方法也会被调用
+  9.如果Bean 实现了BeanPostProcessor接口，Spring就将调用他们的BeanPostProcessor.postProcessAfterInitialization()方法。
+  10.这时Bean已经准备创建完成了。他们将一直存在应用上下文中，直到应用上下文被销毁。（程序执行，业务逻辑调用）
+  11.如果Bean中方法标注注解@PreDestroy，就执行该方法
+  12.如果bean实现了DisposableBean接口，Spring将调用它的destory()接口方法
+  13.如果bean使用了destory-method 声明销毁方法，该方法也会被调用。
+
+spring 循环依赖  https://segmentfault.com/a/1190000039091691?utm_source=sf-similar-article
+
+spring  aop
+
+spring ioc
+
+mysql数据库表设计 + 数据连接url
+  例如:jdbc:mysql://172.16.4.50:3306/syy_standard_consult_local?allowMultiQueries=true&autoReconnect=true&useSSL=false&characterEncoding=utf-8
+  ?后面的参数的了解
+
+设计模式
+
+
+注册中心实现原理
+
+
+java类加载  synchronized的实现原理
+
+
+redis集群及基础
+
+
+elasticSearch的学习
+
+
+jvm
+
+
+3-5月复习过的面试题+中大教务系统
+
+
