@@ -1,4 +1,4 @@
-package com.example.demo.spring;
+package com.example.demo.spring.beanLifeCycle;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
@@ -25,12 +25,12 @@ public class MyInstantiationAwareBeanPostProcessorAdapter extends InstantiationA
     }
 
 
-    // 接口方法、设置某个属性时调用 已过时
-    @Override
-    public PropertyValues postProcessPropertyValues(PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName)throws BeansException {
-        System.out.println("------postProcessPropertyValues方法------");
-        return pvs;
-    }
+//    // 接口方法、设置某个属性时调用 已过时
+//    @Override
+//    public PropertyValues postProcessPropertyValues(PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName)throws BeansException {
+//        System.out.println("------postProcessPropertyValues方法------");
+//        return pvs;
+//    }
 
 
     // 接口方法、实例化Bean之后调用

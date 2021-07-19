@@ -1,13 +1,15 @@
 package com.example.demo.spring;
 
+import com.example.demo.spring.beanLifeCycle.MyBeanFactoryPostProcessor;
+import com.example.demo.spring.beanLifeCycle.MyBeanPostProcessor;
+import com.example.demo.spring.beanLifeCycle.MyInstantiationAwareBeanPostProcessorAdapter;
+import com.example.demo.spring.beanLifeCycle.SpringBean;
+import com.example.demo.spring.circularReference.CircularReference;
+import com.example.demo.spring.circularReference.CircularReference2;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContext;
+import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -28,8 +30,10 @@ public class MySpringTest {
 
 
     /**
+     * springBean生命周期
+     *
      * Spring 只帮我们管理单例模式 Bean 的完整生命周期，对于 prototype 的 bean ，Spring 在创建好交给使用者之后则不会再管理后续的生命周期。
-     * springBean生命周期执行顺序：
+     * 执行顺序：(部分)
      * -->构造方法
      * -->setBeanName_aware
      * -->setBeanFactory_aware
@@ -45,11 +49,11 @@ public class MySpringTest {
      * -->@Bean_destroyMethod
      * -->
      * -->-->-->-->-->-->-->-->-->
-     * @param args
      */
 
-    public static void main(String[] args){
-        ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(SpringBean.class,MyBeanFactoryPostProcessor.class,MyBeanPostProcessor.class,MyInstantiationAwareBeanPostProcessorAdapter.class);
+    @Test
+    public void test1(){
+        ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(SpringBean.class, MyBeanFactoryPostProcessor.class, MyBeanPostProcessor.class, MyInstantiationAwareBeanPostProcessorAdapter.class);
         System.out.println("容器初始化成功");
 
         SpringBean springBean = ctx.getBean("springBean",SpringBean.class);
@@ -59,6 +63,16 @@ public class MySpringTest {
         System.out.println("现在开始关闭容器！");
         ((AnnotationConfigApplicationContext) ctx).removeBeanDefinition("springBean");
 
+    }
+
+    /**
+     * spring循环依赖
+     *
+     */
+    @Test
+    public void test2(){
+        ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CircularReference.class,CircularReference2.class);
+        System.out.println("容器初始化成功");
     }
 
 
