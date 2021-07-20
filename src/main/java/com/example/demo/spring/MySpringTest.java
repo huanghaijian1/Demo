@@ -8,8 +8,11 @@ import com.example.demo.spring.circularReference.CircularReference;
 import com.example.demo.spring.circularReference.CircularReference2;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -65,14 +68,38 @@ public class MySpringTest {
 
     }
 
+
+//    private CircularReference2 circularReference2;
+//    private CircularReference circularReference;
+//    @Autowired
+//    public void setCircularReference(CircularReference circularReference) {
+//        this.circularReference = circularReference;
+//    }
+//    @Autowired
+//    public void setCircularReference2(CircularReference2 circularReference2) {
+//        this.circularReference2 = circularReference2;
+//    }
+
+    private final CircularReference2 circularReference2;
+    private final CircularReference circularReference;
+
+    public MySpringTest(CircularReference circularReference,CircularReference2 circularReference2){
+        this.circularReference = circularReference;
+        this.circularReference2 = circularReference2;
+    }
+
     /**
      * spring循环依赖
      *
      */
     @Test
+    @RequestMapping("/testCircularReference")
     public void test2(){
         ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CircularReference.class,CircularReference2.class);
         System.out.println("容器初始化成功");
+
+        circularReference.test();
+        circularReference2.test();
     }
 
 

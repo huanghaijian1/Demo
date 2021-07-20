@@ -3,7 +3,7 @@ spring系列  https://segmentfault.com/a/1190000020689625?utm_source=sf-similar-
 
 spring bean 生命周期   https://segmentfault.com/a/1190000013875943?utm_source=sf-similar-article
   1.Spring 只帮我们管理单例模式 Bean 的完整生命周期，对于 prototype 的 bean ，Spring 在创建好交给使用者之后则不会再管理后续的生命周期。
-
+     非单例的bean在springboot启动时不会创建
   Bean 的生命周期
   1.Spring启动，查找并加载需要被Spring管理的bean，进行Bean的实例化
   2.Bean实例化后对将Bean属性注入值（3-9可以对Bean属性注入值）
@@ -20,10 +20,29 @@ spring bean 生命周期   https://segmentfault.com/a/1190000013875943?utm_sourc
   13.如果bean使用了destory-method 声明销毁方法，该方法也会被调用。
 
 spring 循环依赖  https://segmentfault.com/a/1190000039091691?utm_source=sf-similar-article
+   1.构造注入的方式，也无法解决循环依赖，只有set注入可以解决。
+   2.Spring 如何使用三级缓存来解决循环依赖的（只有setter注入可以解决），三级缓存分别是：
+     singletonObjects： 一级缓存，存储单例对象，Bean 已经实例化，初始化完成。
+     earlySingletonObjects： 二级缓存，存储 singletonObject，这个 Bean 实例化了，还没有初始化。
+     singletonFactories： 三级缓存，存储 singletonFactory。
+
+
+
+     三级缓存解决循环依赖的源码的核心方法及属性：
+
+
+   3.循环依赖和代理之间的关系是什么？
+     比如 @Transactional 和 @Async 注解会对循环依赖产生什么影响？
+     为什么要用三级缓存？二级缓存不可以么？  https://blog.csdn.net/weixin_45727359/article/details/114696668
+
+
+   4.循环依赖可能出现的异常BeanCurrentlyInCreationException
+
+
 
 spring  aop
 
-spring ioc
+spring ioc 依赖注入的三种方式，优缺点
 
 mysql数据库表设计 + 数据连接url
   例如:jdbc:mysql://172.16.4.50:3306/syy_standard_consult_local?allowMultiQueries=true&autoReconnect=true&useSSL=false&characterEncoding=utf-8
