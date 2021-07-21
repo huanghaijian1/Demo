@@ -11,7 +11,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @EnableAsync
-//@ComponentScan(lazyInit = true)
+//@ComponentScan(lazyInit = true)   解决@Async导致的spring解决循环依赖失效问题
 @SpringBootApplication
 public class DemoApplication {
 

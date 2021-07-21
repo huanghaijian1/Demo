@@ -1,5 +1,7 @@
 0.加急-先看spring源码+java类加载+注册中心原理+互联网项目
-spring系列  https://segmentfault.com/a/1190000020689625?utm_source=sf-similar-article
+spring系列
+  https://ifeve.com/spring-interview-questions-and-answers/
+  https://segmentfault.com/a/1190000020689625?utm_source=sf-similar-article
 
 spring bean 生命周期   https://segmentfault.com/a/1190000013875943?utm_source=sf-similar-article
   1.Spring 只帮我们管理单例模式 Bean 的完整生命周期，对于 prototype 的 bean ，Spring 在创建好交给使用者之后则不会再管理后续的生命周期。
@@ -54,9 +56,10 @@ spring 循环依赖  https://segmentfault.com/a/1190000039091691?utm_source=sf-s
 
 
 
-spring  aop
+spring  aop   https://www.cnblogs.com/hongwz/p/5764917.html
+   事务，日志（自定义注解EnableAop+@Aspect+@Slf4j+logback.xml的联合使用，demo里已有例子）
 
-spring ioc 依赖注入的三种方式，优缺点
+spring ioc 依赖注入的三种方式，优缺点  https://www.cnblogs.com/joemsu/p/7688307.html  原理：底层用反射实现
 
 mysql数据库表设计 + 数据连接url
   例如:jdbc:mysql://172.16.4.50:3306/syy_standard_consult_local?allowMultiQueries=true&autoReconnect=true&useSSL=false&characterEncoding=utf-8

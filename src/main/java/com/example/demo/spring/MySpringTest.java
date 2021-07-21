@@ -1,18 +1,23 @@
 package com.example.demo.spring;
 
+import com.example.demo.annotation.EnableAop;
 import com.example.demo.spring.beanLifeCycle.SpringBean;
 import com.example.demo.spring.circularReference.CircularReference;
 import com.example.demo.spring.circularReference.CircularReference2;
 import com.example.demo.spring.beanLifeCycle.common.MyBeanFactoryPostProcessor;
 import com.example.demo.spring.beanLifeCycle.common.MyBeanPostProcessor;
 import com.example.demo.spring.beanLifeCycle.common.MyInstantiationAwareBeanPostProcessorAdapter;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Api(tags = {"spring学习"})
 @Slf4j
 @RestController
 public class MySpringTest {
@@ -90,8 +95,9 @@ public class MySpringTest {
      * spring循环依赖
      *
      */
-    @Test
-    @RequestMapping("/testCircularReference")
+    @ApiOperation("测试-spring学习")
+    @EnableAop
+    @GetMapping("/testCircularReference")
     public void test2(){
 //        ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CircularReference.class,CircularReference2.class);
 //        System.out.println("容器初始化成功");

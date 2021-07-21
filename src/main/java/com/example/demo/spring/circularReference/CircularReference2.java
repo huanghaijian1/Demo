@@ -21,7 +21,7 @@ public class CircularReference2{
 
     private CircularReference circularReference;
 
-//    @Lazy
+//    @Lazy   解决@Async导致的spring解决循环依赖失效问题
     @Autowired
     public void setCircularReference(CircularReference circularReference) {
         this.circularReference = circularReference;
