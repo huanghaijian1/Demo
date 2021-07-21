@@ -1,5 +1,6 @@
-package com.example.demo.spring.beanLifeCycle;
+package com.example.demo.spring.beanLifeCycle.common;
 
+import com.example.demo.spring.beanLifeCycle.SpringBean;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;

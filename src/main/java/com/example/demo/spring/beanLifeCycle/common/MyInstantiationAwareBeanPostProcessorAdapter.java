@@ -1,11 +1,9 @@
-package com.example.demo.spring.beanLifeCycle;
+package com.example.demo.spring.beanLifeCycle.common;
 
+import com.example.demo.spring.beanLifeCycle.SpringBean;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.stereotype.Component;
-
-import java.beans.PropertyDescriptor;
 
 @Component
 public class MyInstantiationAwareBeanPostProcessorAdapter extends InstantiationAwareBeanPostProcessorAdapter {

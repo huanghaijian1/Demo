@@ -20,23 +20,37 @@ spring bean 生命周期   https://segmentfault.com/a/1190000013875943?utm_sourc
   13.如果bean使用了destory-method 声明销毁方法，该方法也会被调用。
 
 spring 循环依赖  https://segmentfault.com/a/1190000039091691?utm_source=sf-similar-article
-   1.构造注入的方式，也无法解决循环依赖，只有set注入可以解决。
-   2.Spring 如何使用三级缓存来解决循环依赖的（只有setter注入可以解决），三级缓存分别是：
+   1.构造注入的方式，无法解决循环依赖，只有构造注入不可以解决，其他两种注入都能。
+   2.Spring 如何使用三级缓存来解决循环依赖的（只有构造注入不可以解决），
+    三级缓存分别是：
      singletonObjects： 一级缓存，存储单例对象，Bean 已经实例化，初始化完成。
      earlySingletonObjects： 二级缓存，存储 singletonObject，这个 Bean 实例化了，还没有初始化。
      singletonFactories： 三级缓存，存储 singletonFactory。
-
-
 
      三级缓存解决循环依赖的源码的核心方法及属性：
 
 
    3.循环依赖和代理之间的关系是什么？
-     比如 @Transactional 和 @Async 注解会对循环依赖产生什么影响？
+     比如 @Transactional 和 @Async 注解会对循环依赖产生什么影响？ https://blog.csdn.net/luoyang_java/article/details/105835112
+       @Async会导致spring无法解决循环依赖，
+         解决方案：1.不要让@Async的Bean参与循环依赖
+                   2.在启动类加上@ComponentScan(lazyInit = true) ,在依赖注入字段处加上@Lazy(与@Autowired同一地方)
+                   3.把allowRawInjectionDespiteWrapping设置为true
+                         @Component
+                         public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+                             @Override
+                             public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+                                 ((AbstractAutowireCapableBeanFactory) beanFactory).setAllowRawInjectionDespiteWrapping(true);
+                             }
+                         }
+       @Transactional无影响
      为什么要用三级缓存？二级缓存不可以么？  https://blog.csdn.net/weixin_45727359/article/details/114696668
+       因为是代理对象aop时必须用到二级缓存，不然代理对象无法保证单例（再执行一遍singleFactory.getObject()方法会产生一个新的代理对象）
+       所以如果没有AOP的话确实可以两级缓存就可以解决循环依赖的问题，
+       如果加上AOP，两级缓存是无法解决的，不可能每次执行singleFactory.getObject()方法都给我产生一个新的代理对象，所以还要借助另外一个缓存来保存产生的代理对象
 
 
-   4.循环依赖可能出现的异常BeanCurrentlyInCreationException
+   4.循环依赖可能出现的异常BeanCurrentlyInCreationException,UnsatisfiedDependencyException
 
 
 
