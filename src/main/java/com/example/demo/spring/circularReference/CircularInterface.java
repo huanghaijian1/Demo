@@ -5,6 +5,7 @@ import org.springframework.util.StringUtils;
 
 public interface CircularInterface {
 
+    public void test();
 //    protected Object doCreateBean( ... ){
 //...
 //        boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences && isSingletonCurrentlyInCreation(beanName));

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class CircularReference2{
+public final class CircularReference2{
 
 //    private final CircularReference circularReference;
 //
@@ -18,17 +18,20 @@ public class CircularReference2{
 //    @Autowired
 //    private CircularReference circularReference;
 
+//    @Autowired
+//    private CircularInterface circularInterface;
 
-    private CircularReference circularReference;
 
-//    @Lazy   解决@Async导致的spring解决循环依赖失效问题
-    @Autowired
-    public void setCircularReference(CircularReference circularReference) {
-        this.circularReference = circularReference;
-    }
+//    private CircularReference circularReference;
+//
+////    @Lazy   解决@Async导致的spring解决循环依赖失效问题
+//    @Autowired
+//    public void setCircularReference(CircularReference circularReference) {
+//        this.circularReference = circularReference;
+//    }
 
     public void test(){
-        circularReference.test2();
+        //circularInterface.test();
     }
 
 //    @Async    会导致spring无法解决循环依赖

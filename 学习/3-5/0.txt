@@ -58,8 +58,18 @@ spring 循环依赖  https://segmentfault.com/a/1190000039091691?utm_source=sf-s
 
 spring  aop   https://www.cnblogs.com/hongwz/p/5764917.html
    事务，日志（自定义注解EnableAop+@Aspect+@Slf4j+logback.xml的联合使用，demo里已有例子）
+   jdk动态代理 与 CGLib代理的区别？ https://www.cnblogs.com/sandaman2019/p/12636727.html
+    service接口+serviceImpl实现类模式默认使用jdk动态代理，
+    注入是只能注入接口，要注解实现类就必须通过在 @EnableAsync 和/或 @EnableCaching 上设置 proxyTargetClass=true 来强制使用基于 CGLib动态代理
 
 spring ioc 依赖注入的三种方式，优缺点  https://www.cnblogs.com/joemsu/p/7688307.html  原理：底层用反射实现
+使用构造器注入的好处：（spring4.x推荐）
+ 保证依赖不可变（final关键字）
+ 保证依赖不为空（省去了我们对其检查）
+ 保证返回客户端（调用）的代码的时候是完全初始化的状态
+ 避免了循环依赖
+ 提升了代码的可复用性
+ 另外，当有一个依赖有多个实现的使用，推荐使用field注入或者setter注入的方式来指定注入的类型。
 
 mysql数据库表设计 + 数据连接url
   例如:jdbc:mysql://172.16.4.50:3306/syy_standard_consult_local?allowMultiQueries=true&autoReconnect=true&useSSL=false&characterEncoding=utf-8

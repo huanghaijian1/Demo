@@ -2,6 +2,7 @@ package com.example.demo.spring;
 
 import com.example.demo.annotation.EnableAop;
 import com.example.demo.spring.beanLifeCycle.SpringBean;
+import com.example.demo.spring.circularReference.CircularInterface;
 import com.example.demo.spring.circularReference.CircularReference;
 import com.example.demo.spring.circularReference.CircularReference2;
 import com.example.demo.spring.beanLifeCycle.common.MyBeanFactoryPostProcessor;
@@ -84,10 +85,10 @@ public class MySpringTest {
 //    }
 
     private final CircularReference2 circularReference2;
-    private final CircularReference circularReference;
+    private final CircularInterface circularInterface;
 
-    public MySpringTest(CircularReference circularReference,CircularReference2 circularReference2){
-        this.circularReference = circularReference;
+    public MySpringTest(CircularInterface circularInterface,CircularReference2 circularReference2){
+        this.circularInterface = circularInterface;
         this.circularReference2 = circularReference2;
     }
 
@@ -103,7 +104,7 @@ public class MySpringTest {
 //        System.out.println("容器初始化成功");
 
         circularReference2.test();
-        circularReference.test();
+        circularInterface.test();
 
     }
 
