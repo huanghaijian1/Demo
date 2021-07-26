@@ -71,7 +71,7 @@ spring ioc 依赖注入的三种方式，优缺点  https://www.cnblogs.com/joem
  提升了代码的可复用性
  另外，当有一个依赖有多个实现的使用，推荐使用field注入或者setter注入的方式来指定注入的类型。
 
-mysql数据库表设计 + 数据连接url
+mysql数据库表设计 + 数据连接url    https://www.cnblogs.com/soft2018/p/10879760.html
   例如:jdbc:mysql://172.16.4.50:3306/syy_standard_consult_local?allowMultiQueries=true&autoReconnect=true&useSSL=false&characterEncoding=utf-8
   ?后面的参数的了解
 
