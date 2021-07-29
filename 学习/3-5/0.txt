@@ -73,15 +73,49 @@ spring ioc 依赖注入的三种方式，优缺点  https://www.cnblogs.com/joem
 
 mysql数据库表设计 + 数据连接url    https://www.cnblogs.com/soft2018/p/10879760.html
   例如:jdbc:mysql://172.16.4.50:3306/syy_standard_consult_local?allowMultiQueries=true&autoReconnect=true&useSSL=false&characterEncoding=utf-8
-  ?后面的参数的了解
+  ?后面的参数的了解  https://blog.csdn.net/qq_44537267/article/details/109273603
+                     https://blog.csdn.net/weiqiangGG/article/details/82884754?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.readhide&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.readhide
+  如果连接闲置8小时 (8小时内没有进行数据库操作)  autoReconnect=true  自动重连
+     failOverReadOnly  自动重连成功后，连接是否设置为只读？
+     useUnicode  是否使用Unicode字符集，如果参数characterEncoding设置为gb2312、gbk、utf-8，本参数值必须设置为true
+     characterEncoding  当useUnicode设置为true时，指定字符编码。比如可设置为gb2312或gbk，utf-8
+     useSSL 与服务器通讯时是否使用ssl,mysql5.5.45+,5.6.26+,5.7.6+等默认值为true,我们一般设置为false
+  allowMultiQueries=true参数的作用：
+  ①可以在sql语句后携带分号，实现多语句执行。
+  如：mybatis的mapper.xml文件
+  <select id="getAll" resultType="com.xxx.XBean">
+      SELECT * FROM x;
+  </select>
 
-设计模式
+  ②可以执行批处理，同时发出多个SQL语句。
+  <update id="batchUpdate"  parameterType="java.util.List">
+     <foreach collection="devRelDOList" item="devRelDO" separator=";" open="" close="" >
+         UPDATE
+             dev_rel
+         <set>
+             gmt_modified=now(),
+             pro_id = #{devRelDO.proId},
+             dev_id = #{devRelDO.devId},
+             group_id = #{devRelDO.groupId},
+             own_type = #{devRelDO.ownType}
+         </set>
+         <where>
+             id = #{devRelDO.id}
+         </where>
+     </foreach>
+  </update>
 
+设计模式 https://www.runoob.com/design-pattern/decorator-pattern.html
+
+RestTemplate调用外部工程接口（代替httpclient）
 
 注册中心实现原理
 
 
-java类加载  synchronized的实现原理
+java类加载   https://www.cnblogs.com/czwbig/p/11127222.html
+
+
+synchronized的实现原理
 
 
 redis集群及基础
