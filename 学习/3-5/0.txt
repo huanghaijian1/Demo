@@ -107,18 +107,48 @@ mysql数据库表设计 + 数据连接url    https://www.cnblogs.com/soft2018/p/
 
 设计模式 https://www.runoob.com/design-pattern/decorator-pattern.html
 
-RestTemplate调用外部工程接口（代替httpclient）
+RestTemplate调用外部工程接口（代替httpclient）spinrg restTemplate.exchange
+    /**
+       * 替代默认的SimpleClientHttpRequestFactory
+       * 设置超时时间重试次数
+       * 同时设置一些拦截器以便监控
+       * @return
+       */
+      @Bean
+      public RestTemplate restTemplate() {
+          //生成一个设置了连接超时时间、请求超时时间、异常重试次数3次
+          RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(10000).setConnectTimeout(10000).setSocketTimeout(30000).build();
+          HttpClientBuilder builder = HttpClientBuilder.create().setDefaultRequestConfig(config).setRetryHandler(new DefaultHttpRequestRetryHandler(3, false));
+          HttpClient httpClient = builder.build();
+          ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+          RestTemplate restTemplate = new RestTemplate(requestFactory);
+          //做个日志拦截器；从性能上考虑，当前屏蔽该功能
+          //restTemplate.setInterceptors(Collections.singletonList(new RestTemplateConsumerLogger()));
+          return restTemplate;
+      }
+
+用法：
+   String reqJsonStr = "{\"id\":227,\"code\":\"updateCC\", \"group\":\"UPDATE\",\"content\":\"updateCT\", \"order\":9}";
+   HttpHeaders headers = new HttpHeaders();
+   headers.setContentType(MediaType.APPLICATION_JSON);
+   //reqJsonStr为请求参数，可为json可为map
+   HttpEntity<String> entity = new HttpEntity<String>(reqJsonStr,headers);
+   ResponseEntity<Map> resp = restTemplate.exchange(URL, HttpMethod.POST, entity, Map.class);
+   Map map1 = resp.getBody();
 
 注册中心实现原理
+nacos
+https://blog.csdn.net/weixin_41358004/article/details/108506235?utm_term=nacos%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E5%8E%9F%E7%90%86&utm_medium=distribute.pc_aggpage_search_result.none-task-blog-2~all~sobaiduweb~default-0-108506235&spm=3001.4430
+
+redis集群及基础  https://www.cnblogs.com/51life/p/10233340.html
+https://www.cnblogs.com/jasontec/p/9699242.html
+redis常见命令：https://blog.csdn.net/ithomer/article/details/9213185/
 
 
 java类加载   https://www.cnblogs.com/czwbig/p/11127222.html
 
 
 synchronized的实现原理
-
-
-redis集群及基础
 
 
 elasticSearch的学习

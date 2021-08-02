@@ -96,7 +96,7 @@ public class MySpringTest {
      * spring循环依赖
      *
      */
-    @ApiOperation("测试-spring学习")
+    @ApiOperation("spring")
     @EnableAop
     @GetMapping("/testCircularReference")
     public void test2(){
